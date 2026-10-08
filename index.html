@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Catálogo de Fechaduras</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{--bg:#eef0f2;--card:#fff;--ink:#1c2227;--mut:#66727c;--line:#d6dbe0;--acc:#a8741a;--accbg:#f6ecd6;--ok:#2f7d4f;--bad:#b3362c}
+@media(prefers-color-scheme:dark){:root{--bg:#14181c;--card:#1d2328;--ink:#e8ecef;--mut:#93a0aa;--line:#2f383f;--acc:#d9a441;--accbg:#3a2f18;--ok:#5cbb85;--bad:#e5766c}}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.5 "IBM Plex Sans",system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:1px solid var(--line);background:var(--card);padding:8px 14px;border-radius:6px}
+button:hover{border-color:var(--acc)}
+button.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:500}
+button.del{color:var(--bad)}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+input,select,textarea{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:6px;background:var(--card)}
+header{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line);padding:12px 20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+header h1{font-size:18px;margin:0;font-weight:600;margin-right:auto}
+.bar{max-width:1200px;margin:18px auto 0;padding:0 20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.bar input[type=search]{flex:1;min-width:220px;font-size:17px;padding:12px 14px}
+.bar label{display:flex;gap:6px;align-items:center;color:var(--mut);white-space:nowrap}
+.bar label input{width:auto}
+.count{max-width:1200px;margin:8px auto;padding:0 20px;color:var(--mut)}
+.grid{max-width:1200px;margin:0 auto;padding:0 20px 40px;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(310px,100%),1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
+.imgs{overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1px;background:var(--line)}
+.imgs figure{min-width:0;overflow:hidden;margin:0;position:relative;aspect-ratio:1;background:#fff;display:grid;place-items:center}
+.imgs img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;cursor:zoom-in}
+.imgs figcaption{position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.6);color:#fff;font-size:12px;padding:1px 7px;border-radius:4px}
+.imgs .vazio{color:var(--mut);font-size:13px}
+.body{padding:14px;display:flex;flex-direction:column;gap:10px;flex:1}
+.body h2{margin:0;font-size:18px;font-weight:600}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{background:var(--accbg);color:var(--acc);padding:2px 9px;border-radius:99px;font-size:13px;font-weight:500}
+dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}
+dt{color:var(--mut)}dd{margin:0;text-align:right}
+.sim{color:var(--ok);font-weight:600}.nao{color:var(--mut)}
+.precos{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto}
+.precos div{border:1px solid var(--line);border-radius:6px;padding:8px 10px}
+.precos small{display:block;color:var(--mut);font-size:12px}
+.precos b{font-size:18px}
+.acoes{display:flex;gap:8px;padding:0 14px 14px}
+.acoes button{flex:1}
+.vazio-geral{grid-column:1/-1;text-align:center;color:var(--mut);padding:60px 0}
+dialog{border:0;border-radius:12px;padding:0;max-width:560px;width:calc(100% - 24px);background:var(--card);color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.55)}
+form{padding:20px;display:grid;gap:12px}
+form h3{margin:0}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+form label{display:grid;gap:4px;font-size:13px;color:var(--mut)}
+.chk{display:flex!important;grid-template-columns:none;align-items:center;gap:8px;color:var(--ink)!important;font-size:15px!important}
+.chk input{width:auto}
+.prev{height:90px;border:1px dashed var(--line);border-radius:6px;display:grid;place-items:center;overflow:hidden;font-size:12px}
+.prev img{width:100%;height:100%;object-fit:cover}
+.grp{display:grid;gap:6px}.lbl{font-size:13px;color:var(--mut)}
+.checks{display:flex;flex-wrap:wrap;gap:8px}
+.checks label{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:6px;padding:6px 10px;color:var(--ink);font-size:14px;cursor:pointer}
+.checks input{width:auto}
+.linkbtn{display:block;text-align:center;text-decoration:none;color:var(--acc);border:1px solid var(--acc);border-radius:6px;padding:8px;font-weight:500}
+.logo{height:38px;max-width:160px;object-fit:contain}
+#login .logo{display:block;margin:0 auto 4px;height:56px}
+textarea{resize:vertical;line-height:1.45}
+.msgbox{white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:14px;max-height:55vh;overflow:auto;font-size:15px}
+.boxmsg{padding:20px;display:grid;gap:12px}
+.tipo{display:flex;align-items:baseline;gap:8px;padding:10px 14px;color:#fff;font-weight:600;font-size:17px;background:#6b7782}
+.tipo small{font-weight:400;font-size:13px;opacity:.85}
+.tipo-embutir{background:#2b5c8a}
+.tipo-sobrepor{background:#1f7a6d}
+.fim{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}
+#login{max-width:340px;margin:12vh auto;padding:0 20px}
+#login form{background:var(--card);border:1px solid var(--line);border-radius:12px}
+.msg{color:var(--bad);font-size:14px;min-height:20px}
+#zoom img{max-width:100%;max-height:85vh;display:block;margin:auto}
+#zoom{max-width:92vw;background:transparent}
+.hide{display:none!important}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none}
+#toast.on{opacity:1}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login" class="hide">
+  <form id="fLogin">
+    <img class="logo" src="logo.png" alt="Logo" onerror="this.remove()">
+    <h3>Catálogo de Fechaduras</h3>
+    <label>E-mail<input type="email" id="lEmail" required autocomplete="username"></label>
+    <label>Senha<input type="password" id="lSenha" required autocomplete="current-password"></label>
+    <div class="msg" id="lMsg"></div>
+    <button class="pri">Entrar</button>
+  </form>
+</div>
+
+<!-- APP -->
+<div id="app" class="hide">
+  <header>
+    <img class="logo" src="logo.png" alt="Logo" onerror="this.remove()">
+    <h1>Catálogo de Fechaduras</h1>
+    <button id="bNovo" class="pri">Novo modelo</button>
+    <button id="bCsv">Exportar planilha</button>
+    <button id="bSair">Sair</button>
+  </header>
+  <div class="bar">
+    <input type="search" id="busca" placeholder="Buscar: embutir, sobrepor, modelo, tag, compatibilidade…" autofocus>
+  </div>
+  <div class="count" id="count"></div>
+  <main class="grid" id="grid"></main>
+</div>
+
+<!-- CADASTRO / EDIÇÃO -->
+<dialog id="dlg">
+  <form id="fModelo">
+    <h3 id="dTitulo">Novo modelo</h3>
+    <label>Modelo<input id="mModelo" required></label>
+    <div class="row">
+      <label>Tipo de instalação
+        <select id="mTipo"><option>Embutir</option><option>Sobrepor</option></select>
+      </label>
+      <label>Porta (medida)
+        <input id="mPorta" placeholder="ex: 3,5 cm ou 2,5 adaptada">
+      </label>
+    </div>
+    <label>Tags (separe por vírgula)<input id="mTags" placeholder="ex: biometria, wifi, senha, cartão"></label>
+    <div class="grp">
+      <span class="lbl">Compatibilidade</span>
+      <div class="checks" id="mComps"></div>
+      <input id="mOutras" placeholder="Outras (separe por vírgula)">
+    </div>
+    <label>Link da fechadura<input id="mLink" placeholder="https://..."></label>
+    <label>Mensagem pronta (para copiar e enviar no WhatsApp)
+      <textarea id="mMsgPronta" rows="9" placeholder="Digite ou cole aqui o texto completo. As quebras de linha e os emojis serão mantidos."></textarea>
+    </label>
+    <div class="row">
+      <label>Preço de instalação (R$)<input id="mInst" type="number" step="0.01" min="0"></label>
+      <label>Preço de venda (R$)<input id="mVenda" type="number" step="0.01" min="0"></label>
+    </div>
+    <div class="row">
+      <label>Foto da frente<div class="prev" id="pFrente">Sem foto</div><input type="file" accept="image/*" id="mFrente"></label>
+      <label>Foto do verso<div class="prev" id="pVerso">Sem foto</div><input type="file" accept="image/*" id="mVerso"></label>
+    </div>
+    <div class="msg" id="mMsg"></div>
+    <div class="fim">
+      <button type="button" id="bCancel">Cancelar</button>
+      <button class="pri" id="bSalvar">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dMsg">
+  <div class="boxmsg">
+    <h3 id="msgTitulo">Mensagem pronta</h3>
+    <div class="msgbox" id="msgTexto"></div>
+    <div class="fim">
+      <button type="button" id="bMsgFechar">Fechar</button>
+      <button type="button" class="pri" id="bMsgCopiar">Copiar mensagem</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="zoom"><img alt=""></dialog>
+<div id="toast"></div>
+
+<script>
+// ====== CONFIGURE AQUI (Supabase > Project Settings > API) ======
+const SUPABASE_URL = "https://wywzoihubnuyoxjmgucb.supabase.co";
+const SUPABASE_KEY = "sb_publishable_0pK0qLCN6tA1YPHqaqMMRw_u9z7wLa4";
+// ================================================================
+
+const $ = id => document.getElementById(id);
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const COMPAT = ["Madeira","Alumínio","Vidro","Correr Vidro","Correr Madeira"];
+let dados = [], editando = null, arqs = {frente:null, verso:null};
+
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const norm = s => String(s ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+const brl = n => n == null ? "—" : Number(n).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");setTimeout(()=>e.classList.remove("on"),2200)}
+
+// ---------- Sessão ----------
+async function iniciar(){
+  const {data:{session}} = await sb.auth.getSession();
+  mostrar(!!session);
+  if(session) carregar();
+}
+function mostrar(logado){
+  $("login").classList.toggle("hide", logado);
+  $("app").classList.toggle("hide", !logado);
+}
+$("fLogin").onsubmit = async e => {
+  e.preventDefault(); $("lMsg").textContent = "";
+  const {error} = await sb.auth.signInWithPassword({email:$("lEmail").value, password:$("lSenha").value});
+  if(error){ $("lMsg").textContent = "E-mail ou senha incorretos."; return; }
+  mostrar(true); carregar();
+};
+$("bSair").onclick = async () => { await sb.auth.signOut(); mostrar(false); };
+
+// ---------- Dados ----------
+async function carregar(){
+  const {data,error} = await sb.from("fechaduras").select("*").order("modelo");
+  if(error){ toast("Erro ao carregar: "+error.message); return; }
+  dados = data; render();
+}
+function render(){
+  const termos = norm($("busca").value).split(/\s+/).filter(Boolean);
+  const lista = dados.filter(d => {
+    const texto = norm([d.modelo,d.tipo,d.tags,d.compatibilidade,d.porta].join(" "));
+    return termos.every(t => texto.includes(t));
+  });
+  $("count").textContent = lista.length + (lista.length===1 ? " modelo encontrado" : " modelos encontrados");
+  $("grid").innerHTML = lista.length ? lista.map(card).join("") :
+    `<div class="vazio-geral">${dados.length ? "Nenhum modelo com essa busca." : "Nenhum modelo cadastrado. Clique em “Novo modelo” para começar."}</div>`;
+}
+function foto(url,leg){
+  return `<figure>${url ? `<img src="${esc(url)}" alt="${leg}" loading="lazy" data-zoom="${esc(url)}">` : `<span class="vazio">Sem foto</span>`}<figcaption>${leg}</figcaption></figure>`;
+}
+function card(d){
+  const tags = (d.tags||"").split(",").map(t=>t.trim()).filter(Boolean)
+    .map(t=>`<span class="tag">${esc(t)}</span>`).join("");
+  return `<article class="card">
+    <div class="imgs">${foto(d.foto_frente,"Frente")}${foto(d.foto_verso,"Verso")}</div>
+    <div class="tipo tipo-${norm(d.tipo)}"><small>Instalação</small>${esc(d.tipo || "Não informada")}</div>
+    <div class="body">
+      <h2>${esc(d.modelo)}</h2>
+      ${tags ? `<div class="tags">${tags}</div>` : ""}
+      <dl>
+        <dt>Porta</dt><dd>${esc(d.porta||"—")}</dd>
+        <dt>Compatibilidade</dt><dd>${esc(d.compatibilidade||"—")}</dd>
+      </dl>
+      <div class="precos">
+        <div><small>Instalação</small><b>${brl(d.preco_instalacao)}</b></div>
+        <div><small>Venda</small><b>${brl(d.preco_venda)}</b></div>
+      </div>
+      ${d.link ? `<a class="linkbtn" href="${esc(d.link)}" target="_blank" rel="noopener noreferrer">Acessar link da fechadura</a>` : ""}
+      ${d.mensagem ? `<button class="pri" data-msg="${d.id}">Ver mensagem para WhatsApp</button>` : ""}
+    </div>
+    <div class="acoes"><button data-edit="${d.id}">Editar</button><button class="del" data-del="${d.id}">Excluir</button></div>
+  </article>`;
+}
+$("busca").oninput = render;
+
+$("grid").onclick = async e => {
+  const z = e.target.dataset.zoom;
+  if(z){ $("zoom").querySelector("img").src = z; $("zoom").showModal(); return; }
+  if(e.target.dataset.msg){
+    const d = dados.find(x=>x.id===e.target.dataset.msg);
+    $("msgTitulo").textContent = d.modelo;
+    $("msgTexto").textContent = d.mensagem;
+    $("dMsg").showModal(); return;
+  }
+  if(e.target.dataset.edit) abrir(dados.find(d=>d.id===e.target.dataset.edit));
+  if(e.target.dataset.del){
+    const d = dados.find(x=>x.id===e.target.dataset.del);
+    if(!confirm(`Excluir o modelo "${d.modelo}"?`)) return;
+    const {error} = await sb.from("fechaduras").delete().eq("id", d.id);
+    if(error) return toast("Erro: "+error.message);
+    toast("Modelo excluído"); carregar();
+  }
+};
+$("zoom").onclick = () => $("zoom").close();
+$("bMsgFechar").onclick = () => $("dMsg").close();
+$("bMsgCopiar").onclick = async () => {
+  const t = $("msgTexto").textContent;
+  try{ await navigator.clipboard.writeText(t); }
+  catch(_){
+    const a = document.createElement("textarea"); a.value = t; document.body.appendChild(a);
+    a.select(); document.execCommand("copy"); a.remove();
+  }
+  $("dMsg").close(); toast("Mensagem copiada! Cole no WhatsApp");
+};
+
+// ---------- Formulário ----------
+function previa(el, url){ el.innerHTML = url ? `<img src="${esc(url)}" alt="">` : "Sem foto"; }
+function abrir(d){
+  editando = d || null; arqs = {frente:null, verso:null}; $("mMsg").textContent = "";
+  $("dTitulo").textContent = d ? "Editar modelo" : "Novo modelo";
+  $("mModelo").value = d?.modelo || "";
+  $("mTipo").value = d?.tipo || "Embutir";
+  $("mPorta").value = d?.porta || "";
+  $("mTags").value = d?.tags || "";
+  const atuais = (d?.compatibilidade || "").split(",").map(t=>t.trim()).filter(Boolean);
+  $("mComps").innerHTML = COMPAT.map(c => `<label><input type="checkbox" value="${c}" ${atuais.some(a=>norm(a)===norm(c))?"checked":""}> ${c}</label>`).join("");
+  $("mOutras").value = atuais.filter(a => !COMPAT.some(c=>norm(c)===norm(a))).join(", ");
+  $("mLink").value = d?.link || "";
+  $("mMsgPronta").value = d?.mensagem || "";
+  $("mInst").value = d?.preco_instalacao ?? "";
+  $("mVenda").value = d?.preco_venda ?? "";
+  $("mFrente").value = ""; $("mVerso").value = "";
+  previa($("pFrente"), d?.foto_frente); previa($("pVerso"), d?.foto_verso);
+  $("dlg").showModal();
+}
+$("bNovo").onclick = () => abrir(null);
+$("bCancel").onclick = () => $("dlg").close();
+$("mFrente").onchange = e => { arqs.frente = e.target.files[0]; if(arqs.frente) previa($("pFrente"), URL.createObjectURL(arqs.frente)); };
+$("mVerso").onchange = e => { arqs.verso = e.target.files[0]; if(arqs.verso) previa($("pVerso"), URL.createObjectURL(arqs.verso)); };
+
+// padroniza a foto: quadrado de 1000x1000, fundo branco, sem cortar a imagem
+function reduzir(file){
+  return new Promise((ok, fail) => {
+    const img = new Image();
+    img.onload = () => {
+      const T = 1000, k = Math.min(T/img.width, T/img.height);
+      const w = Math.round(img.width*k), h = Math.round(img.height*k);
+      const c = document.createElement("canvas"); c.width = T; c.height = T;
+      const x = c.getContext("2d");
+      x.fillStyle = "#fff"; x.fillRect(0,0,T,T);
+      x.drawImage(img,(T-w)/2,(T-h)/2,w,h);
+      c.toBlob(b => b ? ok(b) : fail(new Error("Falha ao processar a imagem")), "image/jpeg", 0.85);
+    };
+    img.onerror = () => fail(new Error("Imagem inválida"));
+    img.src = URL.createObjectURL(file);
+  });
+}
+function pegarComp(){
+  const marcadas = [...document.querySelectorAll("#mComps input:checked")].map(i=>i.value);
+  const outras = $("mOutras").value.split(",").map(t=>t.trim()).filter(Boolean);
+  return [...marcadas, ...outras].join(", ");
+}
+function normLink(v){
+  v = v.trim(); if(!v) return null;
+  return /^https?:\/\//i.test(v) ? v : "https://" + v;
+}
+async function subir(file){
+  const blob = await reduzir(file);
+  const nome = `${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
+  const {error} = await sb.storage.from("fotos").upload(nome, blob, {contentType:"image/jpeg"});
+  if(error) throw error;
+  return sb.storage.from("fotos").getPublicUrl(nome).data.publicUrl;
+}
+$("fModelo").onsubmit = async e => {
+  e.preventDefault();
+  const btn = $("bSalvar"); btn.disabled = true; btn.textContent = "Salvando…"; $("mMsg").textContent = "";
+  try{
+    const reg = {
+      modelo: $("mModelo").value.trim(),
+      tipo: $("mTipo").value, porta: $("mPorta").value,
+      tags: $("mTags").value.trim(), compatibilidade: pegarComp(),
+      link: normLink($("mLink").value),
+      mensagem: $("mMsgPronta").value.trim() || null,
+      preco_instalacao: $("mInst").value === "" ? null : Number($("mInst").value),
+      preco_venda: $("mVenda").value === "" ? null : Number($("mVenda").value),
+      foto_frente: editando?.foto_frente || null, foto_verso: editando?.foto_verso || null
+    };
+    if(arqs.frente) reg.foto_frente = await subir(arqs.frente);
+    if(arqs.verso) reg.foto_verso = await subir(arqs.verso);
+    const r = editando ? await sb.from("fechaduras").update(reg).eq("id", editando.id)
+                       : await sb.from("fechaduras").insert(reg);
+    if(r.error) throw r.error;
+    $("dlg").close(); toast("Modelo salvo"); carregar();
+  }catch(err){ $("mMsg").textContent = "Erro ao salvar: " + (err.message||err); }
+  btn.disabled = false; btn.textContent = "Salvar";
+};
+
+// ---------- Exportar planilha (CSV) ----------
+$("bCsv").onclick = () => {
+  const cols = ["modelo","tipo","tags","compatibilidade","porta","link","mensagem","preco_instalacao","preco_venda","foto_frente","foto_verso"];
+  const q = v => `"${String(v ?? "").replace(/"/g,'""')}"`;
+  const linhas = [cols.join(";"), ...dados.map(d => cols.map(c => q(d[c])).join(";"))];
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob(["\ufeff"+linhas.join("\n")], {type:"text/csv;charset=utf-8"}));
+  a.download = "fechaduras-backup.csv"; a.click();
+};
+
+iniciar();
+</script>
+</body>
+</html>
