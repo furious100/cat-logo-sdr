@@ -4,6 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Catálogo de Fechaduras</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
+<meta name="apple-mobile-web-app-title" content="Fechaduras">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
@@ -71,7 +76,27 @@ textarea{resize:vertical;line-height:1.45}
 .tipo small{font-weight:400;font-size:13px;opacity:.85}
 .tipo-embutir{background:#2b5c8a}
 .tipo-sobrepor{background:#1f7a6d}
-.fim{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}
+.texto{white-space:pre-wrap;font-size:14.5px}
+.bfoto{aspect-ratio:4/3;background:#fff}
+.bfoto img{display:block;width:100%;height:100%;object-fit:contain;cursor:zoom-in}
+#baseTabs button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.fim{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;margin-top:6px}
+.extra{border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.extra summary{cursor:pointer;padding:10px 12px;font-weight:500}
+.extrain{display:grid;gap:8px;padding:0 12px 12px}
+#painel{position:fixed;top:0;left:0;bottom:0;width:260px;max-width:85vw;background:var(--card);border-right:1px solid var(--line);z-index:20;transform:translateX(-100%);transition:transform .2s;padding:20px;display:flex;flex-direction:column;gap:10px;overflow:auto}
+#painel.aberto{transform:none}
+#painel h3{margin:0 0 4px}
+#navLinks{display:grid;gap:10px}
+#painel a,#painel button{display:block;width:100%;text-align:left;padding:11px 12px;border:1px solid var(--line);border-radius:6px;text-decoration:none;color:var(--ink);background:var(--card)}
+#painel a:hover,#painel button:hover{border-color:var(--acc)}
+#painel button:disabled{opacity:.55;cursor:default}
+#ovl{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:15}
+#histLista{max-height:60vh;overflow:auto}
+.hitem{border-bottom:1px solid var(--line);padding:10px 0;font-size:14px}
+.hitem small{display:block;color:var(--mut)}
+.det{margin-top:4px;color:var(--mut);font-size:13px}
+
 #login{max-width:340px;margin:12vh auto;padding:0 20px}
 #login form{background:var(--card);border:1px solid var(--line);border-radius:12px}
 .msg{color:var(--bad);font-size:14px;min-height:20px}
@@ -98,18 +123,42 @@ textarea{resize:vertical;line-height:1.45}
 
 <!-- APP -->
 <div id="app" class="hide">
+  <div id="ovl" class="hide"></div>
+  <aside id="painel">
+    <h3>Menu</h3>
+    <button type="button" data-vista="catalogo">Catálogo de fechaduras</button>
+    <button type="button" data-vista="problema">Base técnica</button>
+    <button type="button" data-vista="preco">Precificação de serviço</button>
+    <nav id="navLinks"></nav>
+    <button type="button" id="bHist">Histórico de alterações</button>
+  </aside>
   <header>
+    <button id="bMenu" type="button" aria-label="Abrir menu">☰ Menu</button>
     <img class="logo" src="logo.png" alt="Logo" onerror="this.remove()">
     <h1>Catálogo de Fechaduras</h1>
     <button id="bNovo" class="pri">Novo modelo</button>
+    <button id="bNovoBase" class="pri hide">Novo registro</button>
     <button id="bCsv">Exportar planilha</button>
     <button id="bSair">Sair</button>
   </header>
+  <section id="vCatalogo">
   <div class="bar">
     <input type="search" id="busca" placeholder="Buscar: embutir, sobrepor, modelo, tag, compatibilidade…" autofocus>
   </div>
   <div class="count" id="count"></div>
   <main class="grid" id="grid"></main>
+  </section>
+
+  <section id="vBase" class="hide">
+    <div class="bar"><h2 id="baseTitulo" style="margin:0;font-size:20px"></h2></div>
+    <div class="bar" id="baseTabs">
+      <button type="button" data-cat="problema">Problemas</button>
+      <button type="button" data-cat="instalacao">Instalações</button>
+    </div>
+    <div class="bar"><input type="search" id="buscaBase" placeholder="Buscar por título, descrição ou fechadura…"></div>
+    <div class="count" id="countBase"></div>
+    <main class="grid" id="gridBase"></main>
+  </section>
 </div>
 
 <!-- CADASTRO / EDIÇÃO -->
@@ -132,6 +181,9 @@ textarea{resize:vertical;line-height:1.45}
       <input id="mOutras" placeholder="Outras (separe por vírgula)">
     </div>
     <label>Link da fechadura<input id="mLink" placeholder="https://..."></label>
+    <div class="grp"><span class="lbl">Informações adicionais</span></div>
+    <label>Link do vídeo comercial<input id="mVidCom" placeholder="https://..."></label>
+    <label>Link do vídeo educativo<input id="mVidEdu" placeholder="https://..."></label>
     <label>Mensagem pronta (para copiar e enviar no WhatsApp)
       <textarea id="mMsgPronta" rows="9" placeholder="Digite ou cole aqui o texto completo. As quebras de linha e os emojis serão mantidos."></textarea>
     </label>
@@ -155,10 +207,40 @@ textarea{resize:vertical;line-height:1.45}
   <div class="boxmsg">
     <h3 id="msgTitulo">Mensagem pronta</h3>
     <div class="msgbox" id="msgTexto"></div>
+    <div class="checks" id="msgFotos">
+      <label id="lFrente"><input type="checkbox" id="cFrente" checked> Foto da frente</label>
+      <label id="lVerso"><input type="checkbox" id="cVerso"> Foto do verso</label>
+    </div>
+    <div class="lbl" id="msgAviso"></div>
     <div class="fim">
       <button type="button" id="bMsgFechar">Fechar</button>
-      <button type="button" class="pri" id="bMsgCopiar">Copiar mensagem</button>
+      <button type="button" id="bMsgCopiar">Só copiar texto</button>
+      <button type="button" class="pri" id="bMsgZap">Enviar no WhatsApp</button>
     </div>
+  </div>
+</dialog>
+
+<dialog id="dBase">
+  <form id="fBase">
+    <h3 id="bsTitulo">Novo registro</h3>
+    <label><span id="bsLblTitulo">Título</span><input id="bsTit" required></label>
+    <label>Fechadura relacionada<select id="bsFech"></select></label>
+    <label><span id="bsLblDesc">Descrição</span><textarea id="bsDesc" rows="7"></textarea></label>
+    <label id="bsLblValor">Valor adicional (R$)<input id="bsValor" type="number" step="0.01"></label>
+    <label>Foto (opcional)<div class="prev" id="bsPrev">Sem foto</div><input type="file" accept="image/*" id="bsFoto"></label>
+    <div class="msg" id="bsMsg"></div>
+    <div class="fim">
+      <button type="button" id="bsCancel">Cancelar</button>
+      <button class="pri" id="bsSalvar">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dHist">
+  <div class="boxmsg">
+    <h3>Histórico de alterações</h3>
+    <div id="histLista"></div>
+    <div class="fim"><button type="button" id="bHistFechar">Fechar</button></div>
   </div>
 </dialog>
 
@@ -169,6 +251,14 @@ textarea{resize:vertical;line-height:1.45}
 // ====== CONFIGURE AQUI (Supabase > Project Settings > API) ======
 const SUPABASE_URL = "https://wywzoihubnuyoxjmgucb.supabase.co";
 const SUPABASE_KEY = "sb_publishable_0pK0qLCN6tA1YPHqaqMMRw_u9z7wLa4";
+// ================================================================
+
+// ====== LINKS DO PAINEL LATERAL: troque o endereço entre aspas ======
+const LINKS = [
+  { nome: "MAPA SALVADOR", url: "COLE_AQUI_O_LINK_DO_MAPA" },
+  { nome: "QUESTIONÁRIO", url: "COLE_AQUI_O_LINK_DO_QUESTIONARIO" },
+  // para adicionar outro link, copie a linha acima e mude o nome e o endereço
+];
 // ================================================================
 
 const $ = id => document.getElementById(id);
@@ -185,7 +275,7 @@ function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");setTi
 async function iniciar(){
   const {data:{session}} = await sb.auth.getSession();
   mostrar(!!session);
-  if(session) carregar();
+  if(session){ carregar(); carregarBase(); }
 }
 function mostrar(logado){
   $("login").classList.toggle("hide", logado);
@@ -195,9 +285,9 @@ $("fLogin").onsubmit = async e => {
   e.preventDefault(); $("lMsg").textContent = "";
   const {error} = await sb.auth.signInWithPassword({email:$("lEmail").value, password:$("lSenha").value});
   if(error){ $("lMsg").textContent = "E-mail ou senha incorretos."; return; }
-  mostrar(true); carregar();
+  mostrar(true); carregar(); carregarBase();
 };
-$("bSair").onclick = async () => { await sb.auth.signOut(); mostrar(false); };
+$("bSair").onclick = async () => { painel(false); await sb.auth.signOut(); mostrar(false); };
 
 // ---------- Dados ----------
 async function carregar(){
@@ -237,6 +327,10 @@ function card(d){
       </div>
       ${d.link ? `<a class="linkbtn" href="${esc(d.link)}" target="_blank" rel="noopener noreferrer">Acessar link da fechadura</a>` : ""}
       ${d.mensagem ? `<button class="pri" data-msg="${d.id}">Ver mensagem para WhatsApp</button>` : ""}
+      ${(d.video_comercial || d.video_educativo) ? `<details class="extra"><summary>Informações adicionais</summary><div class="extrain">
+        ${d.video_comercial ? `<a class="linkbtn" href="${esc(d.video_comercial)}" target="_blank" rel="noopener noreferrer">Vídeo comercial</a>` : ""}
+        ${d.video_educativo ? `<a class="linkbtn" href="${esc(d.video_educativo)}" target="_blank" rel="noopener noreferrer">Vídeo educativo</a>` : ""}
+      </div></details>` : ""}
     </div>
     <div class="acoes"><button data-edit="${d.id}">Editar</button><button class="del" data-del="${d.id}">Excluir</button></div>
   </article>`;
@@ -247,10 +341,7 @@ $("grid").onclick = async e => {
   const z = e.target.dataset.zoom;
   if(z){ $("zoom").querySelector("img").src = z; $("zoom").showModal(); return; }
   if(e.target.dataset.msg){
-    const d = dados.find(x=>x.id===e.target.dataset.msg);
-    $("msgTitulo").textContent = d.modelo;
-    $("msgTexto").textContent = d.mensagem;
-    $("dMsg").showModal(); return;
+    abrirMsg(dados.find(x=>x.id===e.target.dataset.msg)); return;
   }
   if(e.target.dataset.edit) abrir(dados.find(d=>d.id===e.target.dataset.edit));
   if(e.target.dataset.del){
@@ -263,6 +354,97 @@ $("grid").onclick = async e => {
 };
 $("zoom").onclick = () => $("zoom").close();
 $("bMsgFechar").onclick = () => $("dMsg").close();
+
+// ---------- Enviar no WhatsApp com foto ----------
+let msgFiles = {}, msgId = 0;
+async function carregarFoto(url, nome){
+  try{ const b = await (await fetch(url)).blob(); return new File([b], nome, {type: b.type || "image/jpeg"}); }
+  catch(_){ return null; }
+}
+async function abrirMsg(d){
+  const id = ++msgId; msgFiles = {};
+  $("msgTitulo").textContent = d.modelo; $("msgTexto").textContent = d.mensagem;
+  $("lFrente").classList.toggle("hide", !d.foto_frente); $("lVerso").classList.toggle("hide", !d.foto_verso);
+  $("cFrente").checked = !!d.foto_frente; $("cVerso").checked = false;
+  const temFoto = d.foto_frente || d.foto_verso;
+  $("bMsgZap").disabled = !!temFoto; $("msgAviso").textContent = temFoto ? "Preparando as fotos…" : "";
+  $("dMsg").showModal();
+  if(!temFoto) return;
+  const slug = norm(d.modelo).replace(/[^a-z0-9]+/g,"-");
+  const [f, v] = await Promise.all([
+    d.foto_frente ? carregarFoto(d.foto_frente, slug+"-frente.jpg") : null,
+    d.foto_verso ? carregarFoto(d.foto_verso, slug+"-verso.jpg") : null
+  ]);
+  if(id !== msgId) return;
+  msgFiles = {frente:f, verso:v};
+  $("msgAviso").textContent = ""; $("bMsgZap").disabled = false;
+}
+$("bMsgZap").onclick = async () => {
+  const t = $("msgTexto").textContent, files = [];
+  if($("cFrente").checked && msgFiles.frente) files.push(msgFiles.frente);
+  if($("cVerso").checked && msgFiles.verso) files.push(msgFiles.verso);
+  try{ navigator.clipboard.writeText(t).catch(()=>{}); }catch(_){}   // garantia: texto também fica copiado
+  if(files.length && navigator.canShare && navigator.canShare({files})){
+    try{ await navigator.share({files, text:t}); $("dMsg").close(); return; }
+    catch(err){ if(err.name === "AbortError") return; }
+  }
+  window.open("https://wa.me/?text=" + encodeURIComponent(t), "_blank");
+  toast(files.length ? "Este aparelho não envia foto automática. Anexe a foto no WhatsApp." : "WhatsApp aberto com o texto");
+};
+
+// ---------- Painel lateral ----------
+$("navLinks").innerHTML = LINKS.map(l => /COLE_AQUI/.test(l.url)
+  ? `<button type="button" disabled>${esc(l.nome)} (falta o link)</button>`
+  : `<a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${esc(l.nome)}</a>`).join("");
+function painel(a){ $("painel").classList.toggle("aberto", a); $("ovl").classList.toggle("hide", !a); }
+$("bMenu").onclick = () => painel(true);
+$("ovl").onclick = () => painel(false);
+
+// ---------- Histórico de alterações ----------
+const CAMPOS = {modelo:"Modelo",tipo:"Tipo",tags:"Tags",compatibilidade:"Compatibilidade",porta:"Porta",
+  preco_instalacao:"Preço de instalação",preco_venda:"Preço de venda",link:"Link",mensagem:"Mensagem",
+  foto_frente:"Foto da frente",foto_verso:"Foto do verso",video_comercial:"Vídeo comercial",video_educativo:"Vídeo educativo",biometria:"Biometria"};
+const SEM_VALOR = ["foto_frente","foto_verso","mensagem"];
+const fmt = v => (v == null || v === "") ? "(vazio)" : esc(String(v));
+let histDados = [];
+async function listarHist(){
+  $("histLista").textContent = "Carregando…";
+  const {data,error} = await sb.from("historico").select("*").order("criado_em",{ascending:false}).limit(100);
+  if(error){ $("histLista").textContent = "Erro: " + error.message; return; }
+  histDados = data;
+  $("histLista").innerHTML = data.length ? data.map(h => {
+    const det = (h.acao === "editou" && h.detalhes) ? Object.entries(h.detalhes).map(([k,v]) =>
+      SEM_VALOR.includes(k) ? `${CAMPOS[k]||esc(k)}: alterado` : `${CAMPOS[k]||esc(k)}: ${fmt(v.de)} → ${fmt(v.para)}`).join("<br>") : "";
+    const pode = (h.acao==="editou" && h.detalhes && h.modelo_id) || (h.acao==="excluiu" && h.detalhes) || (h.acao==="criou" && h.modelo_id);
+    return `<div class="hitem"><b>${esc(h.usuario)}</b> ${esc(h.acao)} o modelo <b>${esc(h.modelo)}</b>
+      <small>${new Date(h.criado_em).toLocaleString("pt-BR")}</small>${det ? `<div class="det">${det}</div>` : ""}
+      ${pode ? `<button type="button" data-undo="${h.id}" style="margin-top:6px;padding:4px 10px">${h.acao==="excluiu" ? "Restaurar" : "Desfazer"}</button>` : ""}</div>`;
+  }).join("") : "Nenhuma alteração registrada ainda.";
+}
+$("bHist").onclick = () => { painel(false); $("dHist").showModal(); listarHist(); };
+$("histLista").onclick = async e => {
+  const id = e.target.dataset.undo; if(!id) return;
+  const h = histDados.find(x => String(x.id) === id);
+  if(h.acao === "editou"){
+    const volta = Object.fromEntries(Object.entries(h.detalhes).map(([k,v]) => [k, v.de]));
+    const nomes = Object.keys(volta).map(k => CAMPOS[k]||k).join(", ");
+    if(!confirm(`Voltar "${h.modelo}" ao valor anterior de: ${nomes}?\n\nIsso substitui o valor atual desses campos.`)) return;
+    const {data,error} = await sb.from("fechaduras").update(volta).eq("id", h.modelo_id).select();
+    if(error) return toast("Erro: " + error.message);
+    if(!data.length) return toast("Esse modelo não existe mais. Restaure a exclusão primeiro.");
+  } else if(h.acao === "excluiu"){
+    if(!confirm(`Restaurar o modelo "${h.modelo}"?`)) return;
+    const {error} = await sb.from("fechaduras").insert(h.detalhes);
+    if(error) return toast(error.code === "23505" ? "Esse modelo já foi restaurado." : "Erro: " + error.message);
+  } else {
+    if(!confirm(`Desfazer o cadastro e excluir "${h.modelo}"?`)) return;
+    const {error} = await sb.from("fechaduras").delete().eq("id", h.modelo_id);
+    if(error) return toast("Erro: " + error.message);
+  }
+  toast("Feito. A ação foi registrada no histórico.");
+  await carregar(); listarHist();
+};
+$("bHistFechar").onclick = () => $("dHist").close();
 $("bMsgCopiar").onclick = async () => {
   const t = $("msgTexto").textContent;
   try{ await navigator.clipboard.writeText(t); }
@@ -287,6 +469,8 @@ function abrir(d){
   $("mOutras").value = atuais.filter(a => !COMPAT.some(c=>norm(c)===norm(a))).join(", ");
   $("mLink").value = d?.link || "";
   $("mMsgPronta").value = d?.mensagem || "";
+  $("mVidCom").value = d?.video_comercial || "";
+  $("mVidEdu").value = d?.video_educativo || "";
   $("mInst").value = d?.preco_instalacao ?? "";
   $("mVenda").value = d?.preco_venda ?? "";
   $("mFrente").value = ""; $("mVerso").value = "";
@@ -341,6 +525,7 @@ $("fModelo").onsubmit = async e => {
       tags: $("mTags").value.trim(), compatibilidade: pegarComp(),
       link: normLink($("mLink").value),
       mensagem: $("mMsgPronta").value.trim() || null,
+      video_comercial: normLink($("mVidCom").value), video_educativo: normLink($("mVidEdu").value),
       preco_instalacao: $("mInst").value === "" ? null : Number($("mInst").value),
       preco_venda: $("mVenda").value === "" ? null : Number($("mVenda").value),
       foto_frente: editando?.foto_frente || null, foto_verso: editando?.foto_verso || null
@@ -357,12 +542,112 @@ $("fModelo").onsubmit = async e => {
 
 // ---------- Exportar planilha (CSV) ----------
 $("bCsv").onclick = () => {
-  const cols = ["modelo","tipo","tags","compatibilidade","porta","link","mensagem","preco_instalacao","preco_venda","foto_frente","foto_verso"];
+  const cols = ["modelo","tipo","tags","compatibilidade","porta","link","video_comercial","video_educativo","mensagem","preco_instalacao","preco_venda","foto_frente","foto_verso"];
   const q = v => `"${String(v ?? "").replace(/"/g,'""')}"`;
   const linhas = [cols.join(";"), ...dados.map(d => cols.map(c => q(d[c])).join(";"))];
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob(["\ufeff"+linhas.join("\n")], {type:"text/csv;charset=utf-8"}));
   a.download = "fechaduras-backup.csv"; a.click();
+};
+
+// ---------- Base técnica e Precificação ----------
+const CAT = {
+  problema:  {novo:"Novo problema",  lt:"Problema",             ld:"Como resolver",            ph:"ex: Fechadura não destrava com a biometria"},
+  instalacao:{novo:"Nova instalação",lt:"Tema da instalação",   ld:"Detalhes e passo a passo", ph:"ex: Furação para porta de alumínio"},
+  preco:     {novo:"Nova regra",     lt:"Situação",             ld:"Regra / observação",       ph:"ex: Batente de mármore"}
+};
+let vista = "catalogo", baseDados = [], baseEdit = null, baseFile = null;
+
+async function carregarBase(){
+  const {data,error} = await sb.from("base_tecnica").select("*").order("criado_em",{ascending:false});
+  if(error){ baseDados = []; toast("Base técnica: " + error.message); }
+  else baseDados = data;
+  renderBase();
+}
+function irPara(v){
+  vista = v; painel(false);
+  const cat = v === "catalogo";
+  $("vCatalogo").classList.toggle("hide", !cat); $("vBase").classList.toggle("hide", cat);
+  $("bNovo").classList.toggle("hide", !cat); $("bCsv").classList.toggle("hide", !cat);
+  $("bNovoBase").classList.toggle("hide", cat);
+  if(!cat){
+    $("baseTabs").classList.toggle("hide", v === "preco");
+    $("bNovoBase").textContent = CAT[v].novo; $("buscaBase").value = ""; renderBase();
+  }
+}
+function renderBase(){
+  if(vista === "catalogo") return;
+  document.querySelectorAll("#baseTabs button").forEach(b => b.classList.toggle("on", b.dataset.cat === vista));
+  $("baseTitulo").textContent = vista === "preco" ? "Precificação de serviço" : "Base técnica";
+  const termos = norm($("buscaBase").value).split(/\s+/).filter(Boolean);
+  const lista = baseDados.filter(d => d.categoria === vista &&
+    termos.every(t => norm([d.titulo,d.descricao,d.fechadura].join(" ")).includes(t)));
+  $("countBase").textContent = lista.length + (lista.length === 1 ? " registro" : " registros");
+  $("gridBase").innerHTML = lista.length ? lista.map(cardBase).join("") :
+    `<div class="vazio-geral">Nada cadastrado aqui ainda. Clique em “${CAT[vista].novo}” para começar.</div>`;
+}
+function cardBase(d){
+  return `<article class="card">
+    ${d.foto ? `<div class="bfoto"><img src="${esc(d.foto)}" alt="" loading="lazy" data-zoom="${esc(d.foto)}"></div>` : ""}
+    <div class="body">
+      <h2>${esc(d.titulo)}</h2>
+      ${d.fechadura ? `<div class="tags"><span class="tag">${esc(d.fechadura)}</span></div>` : ""}
+      ${d.valor != null ? `<div class="precos" style="grid-template-columns:1fr;margin-top:0"><div><small>Valor adicional</small><b>${d.valor > 0 ? "+ " : ""}${brl(d.valor)}</b></div></div>` : ""}
+      ${d.descricao ? `<div class="texto">${esc(d.descricao)}</div>` : ""}
+    </div>
+    <div class="acoes"><button data-bedit="${d.id}">Editar</button><button class="del" data-bdel="${d.id}">Excluir</button></div>
+  </article>`;
+}
+function abrirBase(d){
+  baseEdit = d || null; baseFile = null; $("bsMsg").textContent = "";
+  const cat = d?.categoria || vista, c = CAT[cat];
+  $("bsTitulo").textContent = d ? "Editar registro" : c.novo;
+  $("bsLblTitulo").textContent = c.lt; $("bsTit").placeholder = c.ph; $("bsLblDesc").textContent = c.ld;
+  $("bsLblValor").classList.toggle("hide", cat !== "preco");
+  const nomes = [...new Set(dados.map(x => x.modelo))].sort();
+  if(d?.fechadura && !nomes.includes(d.fechadura)) nomes.push(d.fechadura);
+  $("bsFech").innerHTML = `<option value="">Geral (todas as fechaduras)</option>` + nomes.map(m => `<option>${esc(m)}</option>`).join("");
+  $("bsFech").value = d?.fechadura || "";
+  $("bsTit").value = d?.titulo || ""; $("bsDesc").value = d?.descricao || "";
+  $("bsValor").value = d?.valor ?? ""; $("bsFoto").value = ""; previa($("bsPrev"), d?.foto);
+  $("dBase").showModal();
+}
+$("painel").onclick = e => { if(e.target.dataset.vista) irPara(e.target.dataset.vista); };
+$("baseTabs").onclick = e => { if(e.target.dataset.cat) irPara(e.target.dataset.cat); };
+$("buscaBase").oninput = renderBase;
+$("bNovoBase").onclick = () => abrirBase(null);
+$("bsCancel").onclick = () => $("dBase").close();
+$("bsFoto").onchange = e => { baseFile = e.target.files[0]; if(baseFile) previa($("bsPrev"), URL.createObjectURL(baseFile)); };
+$("gridBase").onclick = async e => {
+  const t = e.target.dataset;
+  if(t.zoom){ $("zoom").querySelector("img").src = t.zoom; $("zoom").showModal(); return; }
+  if(t.bedit) abrirBase(baseDados.find(x => x.id === t.bedit));
+  if(t.bdel){
+    const d = baseDados.find(x => x.id === t.bdel);
+    if(!confirm(`Excluir "${d.titulo}"?`)) return;
+    const {error} = await sb.from("base_tecnica").delete().eq("id", d.id);
+    if(error) return toast("Erro: " + error.message);
+    toast("Registro excluído"); carregarBase();
+  }
+};
+$("fBase").onsubmit = async e => {
+  e.preventDefault();
+  const btn = $("bsSalvar"); btn.disabled = true; btn.textContent = "Salvando…"; $("bsMsg").textContent = "";
+  try{
+    const cat = baseEdit?.categoria || vista;
+    const reg = {
+      categoria: cat, titulo: $("bsTit").value.trim(), descricao: $("bsDesc").value.trim() || null,
+      fechadura: $("bsFech").value || null,
+      valor: (cat === "preco" && $("bsValor").value !== "") ? Number($("bsValor").value) : null,
+      foto: baseEdit?.foto || null
+    };
+    if(baseFile) reg.foto = await subir(baseFile);
+    const r = baseEdit ? await sb.from("base_tecnica").update(reg).eq("id", baseEdit.id)
+                       : await sb.from("base_tecnica").insert(reg);
+    if(r.error) throw r.error;
+    $("dBase").close(); toast("Registro salvo"); carregarBase();
+  }catch(err){ $("bsMsg").textContent = "Erro ao salvar: " + (err.message || err); }
+  btn.disabled = false; btn.textContent = "Salvar";
 };
 
 iniciar();
