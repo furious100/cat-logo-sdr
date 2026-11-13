@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Catálogo de Fechaduras</title>
 <link rel="icon" type="image/png" href="logo.png">
 <link rel="apple-touch-icon" href="logo.png">
@@ -13,82 +13,97 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <style>
-:root{--bg:#eef0f2;--card:#fff;--ink:#1c2227;--mut:#66727c;--line:#d6dbe0;--acc:#a8741a;--accbg:#f6ecd6;--ok:#2f7d4f;--bad:#b3362c}
-@media(prefers-color-scheme:dark){:root{--bg:#14181c;--card:#1d2328;--ink:#e8ecef;--mut:#93a0aa;--line:#2f383f;--acc:#d9a441;--accbg:#3a2f18;--ok:#5cbb85;--bad:#e5766c}}
-*{box-sizing:border-box}
+:root{--bg:#ece9e4;--card:#fff;--ink:#1c2024;--mut:#6a737b;--line:#ddd9d2;--acc:#a8741a;--accbg:#f5ead3;--head:#1c2024;--bad:#b3362c;--ipbg:#dcebf7;--ipfg:#1d5f94;--sh:0 1px 2px rgba(20,20,20,.06),0 4px 14px rgba(20,20,20,.05)}
+@media(prefers-color-scheme:dark){:root{--bg:#121518;--card:#1c2126;--ink:#e9edf0;--mut:#97a3ac;--line:#2d353c;--acc:#d9a441;--accbg:#3a2f18;--head:#0d1013;--bad:#e5766c;--ipbg:#17344d;--ipfg:#8cc4f0;--sh:0 1px 2px rgba(0,0,0,.4)}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;font:15px/1.5 "IBM Plex Sans",system-ui,sans-serif;background:var(--bg);color:var(--ink)}
 button,input,select,textarea{font:inherit;color:inherit}
-button{cursor:pointer;border:1px solid var(--line);background:var(--card);padding:8px 14px;border-radius:6px}
+button{cursor:pointer;border:1px solid var(--line);background:var(--card);padding:9px 15px;border-radius:9px;min-height:40px;transition:border-color .15s,filter .15s}
 button:hover{border-color:var(--acc)}
-button.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:500}
+button.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+button.pri:hover{filter:brightness(1.08)}
 button.del{color:var(--bad)}
+button:disabled{opacity:.55;cursor:default}
 :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
-input,select,textarea{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:6px;background:var(--card)}
-header{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line);padding:12px 20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-header h1{font-size:18px;margin:0;font-weight:600;margin-right:auto}
-.bar{max-width:1200px;margin:18px auto 0;padding:0 20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-.bar input[type=search]{flex:1;min-width:220px;font-size:17px;padding:12px 14px}
-.bar label{display:flex;gap:6px;align-items:center;color:var(--mut);white-space:nowrap}
-.bar label input{width:auto}
-.count{max-width:1200px;margin:8px auto;padding:0 20px;color:var(--mut)}
-.grid{max-width:1200px;margin:0 auto;padding:0 20px 40px;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(310px,100%),1fr));gap:16px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
-.imgs{overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1px;background:var(--line)}
-.imgs figure{min-width:0;overflow:hidden;margin:0;position:relative;aspect-ratio:1;background:#fff;display:grid;place-items:center}
-.imgs img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;cursor:zoom-in}
-.imgs figcaption{position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.6);color:#fff;font-size:12px;padding:1px 7px;border-radius:4px}
-.imgs .vazio{color:var(--mut);font-size:13px}
-.body{padding:14px;display:flex;flex-direction:column;gap:10px;flex:1}
-.body h2{margin:0;font-size:18px;font-weight:600}
-.tags{display:flex;flex-wrap:wrap;gap:6px}
-.tag{background:var(--accbg);color:var(--acc);padding:2px 9px;border-radius:99px;font-size:13px;font-weight:500}
-dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}
-dt{color:var(--mut)}dd{margin:0;text-align:right}
-.sim{color:var(--ok);font-weight:600}.nao{color:var(--mut)}
-.precos{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto}
-.precos div{border:1px solid var(--line);border-radius:6px;padding:8px 10px}
-.precos small{display:block;color:var(--mut);font-size:12px}
-.precos b{font-size:18px}
-.acoes{display:flex;gap:8px;padding:0 14px 14px}
-.acoes button{flex:1}
-.vazio-geral{grid-column:1/-1;text-align:center;color:var(--mut);padding:60px 0}
-dialog{border:0;border-radius:12px;padding:0;max-width:560px;width:calc(100% - 24px);background:var(--card);color:var(--ink)}
-dialog::backdrop{background:rgba(0,0,0,.55)}
-form{padding:20px;display:grid;gap:12px}
-form h3{margin:0}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-form label{display:grid;gap:4px;font-size:13px;color:var(--mut)}
-.chk{display:flex!important;grid-template-columns:none;align-items:center;gap:8px;color:var(--ink)!important;font-size:15px!important}
-.chk input{width:auto}
-.prev{height:90px;border:1px dashed var(--line);border-radius:6px;display:grid;place-items:center;overflow:hidden;font-size:12px}
-.prev img{width:100%;height:100%;object-fit:cover}
-.grp{display:grid;gap:6px}.lbl{font-size:13px;color:var(--mut)}
-.checks{display:flex;flex-wrap:wrap;gap:8px}
-.checks label{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:6px;padding:6px 10px;color:var(--ink);font-size:14px;cursor:pointer}
-.checks input{width:auto}
-.linkbtn{display:block;text-align:center;text-decoration:none;color:var(--acc);border:1px solid var(--acc);border-radius:6px;padding:8px;font-weight:500}
-.logo{height:38px;max-width:160px;object-fit:contain}
-#login .logo{display:block;margin:0 auto 4px;height:56px}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--card);font-size:16px}
 textarea{resize:vertical;line-height:1.45}
-.msgbox{white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:14px;max-height:55vh;overflow:auto;font-size:15px}
-.boxmsg{padding:20px;display:grid;gap:12px}
-.tipo{display:flex;align-items:baseline;gap:8px;padding:10px 14px;color:#fff;font-weight:600;font-size:17px;background:#6b7782}
+.hide{display:none!important}
+header{position:sticky;top:0;z-index:5;background:var(--head);color:#fff;padding:calc(10px + env(safe-area-inset-top)) 18px 10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+header h1{font-size:17px;margin:0 auto 0 2px;font-weight:600}
+header button{background:transparent;color:#fff;border-color:rgba(255,255,255,.28)}
+header button.pri{background:var(--acc);border-color:var(--acc)}
+.logo{height:34px;max-width:140px;object-fit:contain}
+header .logo{background:#fff;border-radius:8px;padding:3px 7px}
+.bar{max-width:1200px;margin:16px auto 0;padding:0 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.bar input[type=search]{flex:1;min-width:200px;font-size:17px;padding:14px 16px;border-radius:12px;box-shadow:var(--sh)}
+.chips{max-width:1200px;margin:12px auto 0;padding:0 18px;display:flex;gap:8px;flex-wrap:wrap}
+.chip{min-height:36px;padding:5px 14px;border-radius:99px;font-size:14px}
+.chip.on{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+.chip.limpar{border-style:dashed;color:var(--mut)}
+.count{max-width:1200px;margin:12px auto;padding:0 18px;color:var(--mut);font-size:14px}
+.grid{max-width:1200px;margin:0 auto;padding:0 18px 96px;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(320px,100%),1fr));gap:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--sh);transition:box-shadow .2s,transform .2s}
+@media(hover:hover){.card:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(20,20,20,.13)}}
+.imgs{overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:2px;background:var(--line)}
+.imgs figure{min-width:0;overflow:hidden;margin:0;position:relative;aspect-ratio:1;background:var(--bg);display:grid;place-items:center}
+.imgs img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;cursor:zoom-in}
+.imgs figcaption{position:absolute;left:8px;bottom:8px;background:rgba(0,0,0,.6);color:#fff;font-size:12px;padding:1px 8px;border-radius:99px}
+.imgs .vazio{color:var(--mut);font-size:13px}
+.tipo{display:flex;align-items:baseline;gap:8px;padding:9px 16px;color:#fff;font-weight:600;font-size:16px;background:#6b7782}
 .tipo small{font-weight:400;font-size:13px;opacity:.85}
 .tipo-embutir{background:#2b5c8a}
 .tipo-sobrepor{background:#1f7a6d}
-.texto{white-space:pre-wrap;font-size:14.5px}
-.bfoto{aspect-ratio:4/3;background:#fff}
-.bfoto img{display:block;width:100%;height:100%;object-fit:contain;cursor:zoom-in}
-#baseTabs button.on{background:var(--acc);border-color:var(--acc);color:#fff}
-.fim{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;margin-top:6px}
-.extra{border:1px solid var(--line);border-radius:8px;background:var(--bg)}
-.extra summary{cursor:pointer;padding:10px 12px;font-weight:500}
+.body{padding:16px;display:flex;flex-direction:column;gap:12px;flex:1}
+.body h2{margin:0;font-size:20px;font-weight:600;line-height:1.2}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{background:var(--accbg);color:var(--acc);padding:3px 10px;border-radius:99px;font-size:13px;font-weight:600}
+.tag.ip{background:var(--ipbg);color:var(--ipfg)}
+dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:5px 12px;font-size:14px}
+dt{color:var(--mut)}dd{margin:0;text-align:right}
+.precos{display:grid;grid-template-columns:1fr 1.2fr;gap:8px;margin-top:auto}
+.precos div{border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+.precos div.venda{background:var(--accbg);border-color:transparent}
+.precos small{display:block;color:var(--mut);font-size:12px}
+.precos b{font-size:19px;font-variant-numeric:tabular-nums}
+.parc{display:block;font-style:normal;color:var(--acc);font-size:12.5px;font-weight:600}
+.acoes{display:flex;gap:8px;padding:0 16px 16px}
+.acoes button{flex:1}
+.vazio-geral{grid-column:1/-1;text-align:center;color:var(--mut);padding:60px 0}
+.linkbtn{display:block;text-align:center;text-decoration:none;color:var(--acc);border:1px solid var(--acc);border-radius:9px;padding:10px;font-weight:600}
+.extra{border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.extra summary{cursor:pointer;padding:11px 12px;font-weight:500}
 .extrain{display:grid;gap:8px;padding:0 12px 12px}
-#painel{position:fixed;top:0;left:0;bottom:0;width:260px;max-width:85vw;background:var(--card);border-right:1px solid var(--line);z-index:20;transform:translateX(-100%);transition:transform .2s;padding:20px;display:flex;flex-direction:column;gap:10px;overflow:auto}
+.texto{white-space:pre-wrap;font-size:14.5px}
+.bfoto{aspect-ratio:4/3;background:var(--bg)}
+.bfoto img{display:block;width:100%;height:100%;object-fit:cover;cursor:zoom-in}
+#baseTabs button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+dialog{border:0;border-radius:16px;padding:0;max-width:600px;width:calc(100% - 24px);max-height:92vh;overflow:auto;background:var(--card);color:var(--ink)}
+dialog::backdrop{background:rgba(10,12,14,.6);backdrop-filter:blur(2px)}
+form{padding:20px;display:grid;gap:12px}
+form h3{margin:0}
+form label{display:grid;gap:4px;font-size:13px;color:var(--mut)}
+.boxmsg{padding:20px;display:grid;gap:12px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grp{display:grid;gap:8px}.lbl{font-size:13px;color:var(--mut)}
+.checks{display:flex;flex-wrap:wrap;gap:8px}
+.checks label{display:flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:9px;padding:8px 12px;color:var(--ink);font-size:14.5px;cursor:pointer}
+.checks input{width:auto}
+.checks label:has(input:checked){background:var(--accbg);border-color:var(--acc);color:var(--acc);font-weight:600}
+.prev{height:110px;border:1px dashed var(--line);border-radius:10px;display:grid;place-items:center;overflow:hidden;font-size:12px}
+.prev img{width:100%;height:100%;object-fit:cover}
+.fim{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;margin-top:6px}
+.msg{color:var(--bad);font-size:14px;min-height:20px}
+.msgbox{white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px;max-height:55vh;overflow:auto}
+#login{max-width:360px;margin:12vh auto;padding:0 20px}
+#login form{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--sh)}
+#login .logo{display:block;margin:0 auto 4px;height:56px}
+#zoom{max-width:92vw;background:transparent}
+#zoom img{max-width:100%;max-height:85vh;display:block;margin:auto}
+#painel{position:fixed;top:0;left:0;bottom:0;width:280px;max-width:85vw;background:var(--card);border-right:1px solid var(--line);z-index:20;transform:translateX(-100%);transition:transform .2s;padding:calc(20px + env(safe-area-inset-top)) 18px 20px;display:flex;flex-direction:column;gap:10px;overflow:auto}
 #painel.aberto{transform:none}
 #painel h3{margin:0 0 4px}
 #navLinks{display:grid;gap:10px}
-#painel a,#painel button{display:block;width:100%;text-align:left;padding:11px 12px;border:1px solid var(--line);border-radius:6px;text-decoration:none;color:var(--ink);background:var(--card)}
+#painel a,#painel button{display:block;width:100%;text-align:left;padding:12px;border:1px solid var(--line);border-radius:10px;text-decoration:none;color:var(--ink);background:var(--card)}
 #painel a:hover,#painel button:hover{border-color:var(--acc)}
 #painel button:disabled{opacity:.55;cursor:default}
 #ovl{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:15}
@@ -96,15 +111,29 @@ textarea{resize:vertical;line-height:1.45}
 .hitem{border-bottom:1px solid var(--line);padding:10px 0;font-size:14px}
 .hitem small{display:block;color:var(--mut)}
 .det{margin-top:4px;color:var(--mut);font-size:13px}
-
-#login{max-width:340px;margin:12vh auto;padding:0 20px}
-#login form{background:var(--card);border:1px solid var(--line);border-radius:12px}
-.msg{color:var(--bad);font-size:14px;min-height:20px}
-#zoom img{max-width:100%;max-height:85vh;display:block;margin:auto}
-#zoom{max-width:92vw;background:transparent}
-.hide{display:none!important}
-#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none}
+#fab{display:none;position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:6;border-radius:99px;padding:0 22px;min-height:52px;align-items:center;font-size:16px;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+#toast{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:10px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:50;max-width:90vw;text-align:center}
 #toast.on{opacity:1}
+@media(max-width:640px){
+  body{font-size:15.5px}
+  header{padding-left:12px;padding-right:12px;flex-wrap:nowrap}
+  header h1,#bNovo,#bNovoBase,#bCsv,#bSair{display:none!important}
+  header .logo{margin-left:auto}
+  #fab{display:flex}
+  #toast{bottom:calc(84px + env(safe-area-inset-bottom))}
+  .bar,.chips,.count{padding-left:12px;padding-right:12px}
+  .grid{padding:0 12px 100px;gap:14px}
+  .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:none;min-height:40px}
+  button{min-height:46px}
+  .row{grid-template-columns:1fr}
+  .row.dois{grid-template-columns:1fr 1fr}
+  dialog{width:100%;max-width:100%;margin:auto 0 0;border-radius:18px 18px 0 0;max-height:94dvh}
+  #zoom{margin:auto;border-radius:0;max-height:none}
+  form{padding:18px 16px calc(24px + env(safe-area-inset-bottom))}
+  .fim button{flex:1}
+}
 </style>
 </head>
 <body>
@@ -131,6 +160,10 @@ textarea{resize:vertical;line-height:1.45}
     <button type="button" data-vista="preco">Precificação de serviço</button>
     <nav id="navLinks"></nav>
     <button type="button" id="bHist">Histórico de alterações</button>
+    <button type="button" id="pCsv">Exportar planilha</button>
+    <button type="button" id="pBordas">Corrigir bordas das fotos</button>
+    <button type="button" id="pPadroniza">Padronizar tags e compatibilidade</button>
+    <button type="button" id="pSair">Sair</button>
   </aside>
   <header>
     <button id="bMenu" type="button" aria-label="Abrir menu">☰ Menu</button>
@@ -143,8 +176,9 @@ textarea{resize:vertical;line-height:1.45}
   </header>
   <section id="vCatalogo">
   <div class="bar">
-    <input type="search" id="busca" placeholder="Buscar: embutir, sobrepor, modelo, tag, compatibilidade…" autofocus>
+    <input type="search" id="busca" placeholder="Buscar modelo, embutir, sobrepor…" autofocus>
   </div>
+  <div class="chips" id="chips"></div>
   <div class="count" id="count"></div>
   <main class="grid" id="grid"></main>
   </section>
@@ -159,6 +193,7 @@ textarea{resize:vertical;line-height:1.45}
     <div class="count" id="countBase"></div>
     <main class="grid" id="gridBase"></main>
   </section>
+  <button id="fab" class="pri" type="button">＋ Novo</button>
 </div>
 
 <!-- CADASTRO / EDIÇÃO -->
@@ -174,7 +209,7 @@ textarea{resize:vertical;line-height:1.45}
         <input id="mPorta" placeholder="ex: 3,5 cm ou 2,5 adaptada">
       </label>
     </div>
-    <label>Tags (separe por vírgula)<input id="mTags" placeholder="ex: biometria, wifi, senha, cartão"></label>
+    <div class="grp"><span class="lbl">Tags</span><div class="checks" id="mTagsBox"></div><input id="mTagsOutras" placeholder="Outras tags (separe por vírgula)"></div>
     <div class="grp">
       <span class="lbl">Compatibilidade</span>
       <div class="checks" id="mComps"></div>
@@ -187,10 +222,12 @@ textarea{resize:vertical;line-height:1.45}
     <label>Mensagem pronta (para copiar e enviar no WhatsApp)
       <textarea id="mMsgPronta" rows="9" placeholder="Digite ou cole aqui o texto completo. As quebras de linha e os emojis serão mantidos."></textarea>
     </label>
-    <div class="row">
+    <div class="row dois">
       <label>Preço de instalação (R$)<input id="mInst" type="number" step="0.01" min="0"></label>
       <label>Preço de venda (R$)<input id="mVenda" type="number" step="0.01" min="0"></label>
     </div>
+    <label>Valor parcelado (calculado sozinho, pode editar)<input id="mParc" placeholder="ex: 6x de R$ 149,90"></label>
+    <div class="lbl" id="parcDica"></div>
     <div class="row">
       <label>Foto da frente<div class="prev" id="pFrente">Sem foto</div><input type="file" accept="image/*" id="mFrente"></label>
       <label>Foto do verso<div class="prev" id="pVerso">Sem foto</div><input type="file" accept="image/*" id="mVerso"></label>
@@ -223,11 +260,12 @@ textarea{resize:vertical;line-height:1.45}
 <dialog id="dBase">
   <form id="fBase">
     <h3 id="bsTitulo">Novo registro</h3>
+    <label>Fechadura do catálogo (importa o nome e a foto)<select id="bsFech"></select></label>
     <label><span id="bsLblTitulo">Título</span><input id="bsTit" required></label>
-    <label>Fechadura relacionada<select id="bsFech"></select></label>
     <label><span id="bsLblDesc">Descrição</span><textarea id="bsDesc" rows="7"></textarea></label>
     <label id="bsLblValor">Valor adicional (R$)<input id="bsValor" type="number" step="0.01"></label>
     <label>Foto (opcional)<div class="prev" id="bsPrev">Sem foto</div><input type="file" accept="image/*" id="bsFoto"></label>
+    <button type="button" id="bsFotoX">Remover foto</button>
     <div class="msg" id="bsMsg"></div>
     <div class="fim">
       <button type="button" id="bsCancel">Cancelar</button>
@@ -257,14 +295,56 @@ const SUPABASE_KEY = "sb_publishable_0pK0qLCN6tA1YPHqaqMMRw_u9z7wLa4";
 const LINKS = [
   { nome: "MAPA SALVADOR", url: "COLE_AQUI_O_LINK_DO_MAPA" },
   { nome: "QUESTIONÁRIO", url: "COLE_AQUI_O_LINK_DO_QUESTIONARIO" },
-  { nome: "CENTRAL DE LEADS", url: "https://furious100.github.io/central-lead-smart/" },
+  { nome: "CENTRAL DE LEADS", url: "COLE_AQUI_O_LINK_DA_CENTRAL_DE_LEADS" },
   // para adicionar outro link, copie a linha acima e mude o nome e o endereço
 ];
 // ================================================================
 
+// ====== JUROS DO PARCELADO ======
+// fator = quanto o parcelado custa sobre o preço à vista (1.10 = 10% a mais no total)
+const PARCELAS = [
+  { n: 6, fator: 1.10 },
+  // { n: 10, fator: 1.1243 },   // para ativar outra opção, tire as duas barras do começo da linha
+];
+// ================================================
+
 const $ = id => document.getElementById(id);
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-const COMPAT = ["Madeira","Alumínio","Vidro","Correr Vidro","Correr Madeira"];
+const COMPAT = ["Madeira","Alumínio","Vidro","Correr Vidro","Correr Madeira","IP55"];
+const TAGS = ["Biometria","Senha","Tag","App","App/Wi-fi","App/BT","Chave de emergência","Entrada T/C","Bateria 9V"];
+const CHIPS = [{v:"Embutir",l:"Embutir"},{v:"Sobrepor",l:"Sobrepor"}, ...TAGS.map(t=>({v:t,l:t})), {v:"IP55",l:"IP55 · prova d’água"}];
+const filtros = new Set();
+const atributos = d => new Set([padronizaTipo(d.tipo), ...padroniza(d.tags, TAGS, SINON_TAGS), ...padroniza(d.compatibilidade, COMPAT, {})].map(x => norm(x).trim()).filter(Boolean));
+
+// ---------- Padronização de tags, compatibilidade e tipo ----------
+// siglas ficam em MAIÚSCULAS (BT, USB, IP55); nomes comuns ficam normais (Cartão, Senha)
+const SINON_TAGS = {
+  digital:"Biometria", impressaodigital:"Biometria",
+  password:"Senha", codigo:"Senha", senhanumerica:"Senha",
+  tags:"Tag", chaveiro:"Tag",
+  cartao:"Tag", cartaotag:"Tag", cartaoetag:"Tag", cartaodeproximidade:"Tag",
+  aplicativo:"App", controlepeloapp:"App",
+  wifi:"App/Wi-fi", wifiapp:"App/Wi-fi", appwifi:"App/Wi-fi",
+  bt:"App/BT", bluetooth:"App/BT", btapp:"App/BT", appbluetooth:"App/BT", bluetoothapp:"App/BT",
+  chave:"Chave de emergência", chaveemergencia:"Chave de emergência", chavesdeemergencia:"Chave de emergência", emergencia:"Chave de emergência",
+  carregamentousb:"Entrada T/C", usb:"Entrada T/C", cargausb:"Entrada T/C", carregamento:"Entrada T/C", carregadorusb:"Entrada T/C", entradausb:"Entrada T/C", typec:"Entrada T/C", tipoc:"Entrada T/C", entradatipoc:"Entrada T/C", entradatypec:"Entrada T/C",
+  "9v":"Bateria 9V", bateria:"Bateria 9V"
+};
+const chave = t => norm(t).replace(/[^a-z0-9]/g, "");
+const suave = t => /^ip\d+$/i.test(t) ? t.toUpperCase()
+  : (t === t.toUpperCase() && t.length <= 4 && /[A-Z]/.test(t)) ? t
+  : t.charAt(0).toUpperCase() + t.slice(1).toLowerCase();
+function padroniza(txt, lista, sin){
+  const mapa = {...sin}; lista.forEach(t => mapa[chave(t)] = t);
+  const out = [];
+  String(txt || "").split(",").map(t => t.trim()).filter(Boolean).forEach(bruto => {
+    [].concat(mapa[chave(bruto)] || suave(bruto)).forEach(i => { if(!out.includes(i)) out.push(i); });
+  });
+  const ordem = t => { const i = lista.indexOf(t); return i < 0 ? 999 : i; };
+  return out.sort((a, b) => ordem(a) - ordem(b));
+}
+const padronizaTipo = t => { const k = chave(t); return k === "embutir" ? "Embutir" : k === "sobrepor" ? "Sobrepor" : (t || ""); };
+
 let dados = [], editando = null, arqs = {frente:null, verso:null};
 
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -299,8 +379,9 @@ async function carregar(){
 function render(){
   const termos = norm($("busca").value).split(/\s+/).filter(Boolean);
   const lista = dados.filter(d => {
-    const texto = norm([d.modelo,d.tipo,d.tags,d.compatibilidade,d.porta].join(" "));
-    return termos.every(t => texto.includes(t));
+    const texto = norm([d.modelo, padronizaTipo(d.tipo), padroniza(d.tags,TAGS,SINON_TAGS).join(" "), padroniza(d.compatibilidade,COMPAT,{}).join(" "), d.porta].join(" "));
+    const limpo = texto.replace(/[^a-z0-9]/g, "");
+    return termos.every(t => texto.includes(t) || limpo.includes(t.replace(/[^a-z0-9]/g, ""))) && [...filtros].every(f => atributos(d).has(norm(f)));
   });
   $("count").textContent = lista.length + (lista.length===1 ? " modelo encontrado" : " modelos encontrados");
   $("grid").innerHTML = lista.length ? lista.map(card).join("") :
@@ -310,21 +391,22 @@ function foto(url,leg){
   return `<figure>${url ? `<img src="${esc(url)}" alt="${leg}" loading="lazy" data-zoom="${esc(url)}">` : `<span class="vazio">Sem foto</span>`}<figcaption>${leg}</figcaption></figure>`;
 }
 function card(d){
-  const tags = (d.tags||"").split(",").map(t=>t.trim()).filter(Boolean)
+  const ip = norm(d.compatibilidade).includes("ip55");
+  const tags = (ip ? `<span class="tag ip">IP55 · prova d’água</span>` : "") + padroniza(d.tags, TAGS, SINON_TAGS)
     .map(t=>`<span class="tag">${esc(t)}</span>`).join("");
   return `<article class="card">
     <div class="imgs">${foto(d.foto_frente,"Frente")}${foto(d.foto_verso,"Verso")}</div>
-    <div class="tipo tipo-${norm(d.tipo)}"><small>Instalação</small>${esc(d.tipo || "Não informada")}</div>
+    <div class="tipo tipo-${norm(padronizaTipo(d.tipo))}"><small>Instalação</small>${esc(padronizaTipo(d.tipo) || "Não informada")}</div>
     <div class="body">
       <h2>${esc(d.modelo)}</h2>
       ${tags ? `<div class="tags">${tags}</div>` : ""}
       <dl>
         <dt>Porta</dt><dd>${esc(d.porta||"—")}</dd>
-        <dt>Compatibilidade</dt><dd>${esc(d.compatibilidade||"—")}</dd>
+        <dt>Compatibilidade</dt><dd>${esc(padroniza(d.compatibilidade, COMPAT, {}).join(", ") || "—")}</dd>
       </dl>
       <div class="precos">
         <div><small>Instalação</small><b>${brl(d.preco_instalacao)}</b></div>
-        <div><small>Venda</small><b>${brl(d.preco_venda)}</b></div>
+        <div class="venda"><small>Venda</small><b>${brl(d.preco_venda)}</b>${d.valor_parcelado ? `<em class="parc">${esc(d.valor_parcelado)}</em>` : ""}</div>
       </div>
       ${d.link ? `<a class="linkbtn" href="${esc(d.link)}" target="_blank" rel="noopener noreferrer">Acessar link da fechadura</a>` : ""}
       ${d.mensagem ? `<button class="pri" data-msg="${d.id}">Ver mensagem para WhatsApp</button>` : ""}
@@ -403,7 +485,7 @@ $("ovl").onclick = () => painel(false);
 
 // ---------- Histórico de alterações ----------
 const CAMPOS = {modelo:"Modelo",tipo:"Tipo",tags:"Tags",compatibilidade:"Compatibilidade",porta:"Porta",
-  preco_instalacao:"Preço de instalação",preco_venda:"Preço de venda",link:"Link",mensagem:"Mensagem",
+  preco_instalacao:"Preço de instalação",preco_venda:"Preço de venda",valor_parcelado:"Valor parcelado",link:"Link",mensagem:"Mensagem",
   foto_frente:"Foto da frente",foto_verso:"Foto do verso",video_comercial:"Vídeo comercial",video_educativo:"Vídeo educativo",biometria:"Biometria"};
 const SEM_VALOR = ["foto_frente","foto_verso","mensagem"];
 const fmt = v => (v == null || v === "") ? "(vazio)" : esc(String(v));
@@ -462,10 +544,13 @@ function abrir(d){
   editando = d || null; arqs = {frente:null, verso:null}; $("mMsg").textContent = "";
   $("dTitulo").textContent = d ? "Editar modelo" : "Novo modelo";
   $("mModelo").value = d?.modelo || "";
-  $("mTipo").value = d?.tipo || "Embutir";
+  $("mTipo").value = padronizaTipo(d?.tipo) || "Embutir";
   $("mPorta").value = d?.porta || "";
-  $("mTags").value = d?.tags || "";
-  const atuais = (d?.compatibilidade || "").split(",").map(t=>t.trim()).filter(Boolean);
+  const tg = padroniza(d?.tags, TAGS, SINON_TAGS);
+  $("mTagsBox").innerHTML = TAGS.map(c => `<label><input type="checkbox" value="${c}" ${tg.some(a=>norm(a)===norm(c))?"checked":""}> ${c}</label>`).join("");
+  $("mTagsOutras").value = tg.filter(a => !TAGS.some(c=>norm(c)===norm(a))).join(", ");
+  $("mParc").value = d?.valor_parcelado || ""; parcManual = false; $("parcDica").textContent = "";
+  const atuais = padroniza(d?.compatibilidade, COMPAT, {});
   $("mComps").innerHTML = COMPAT.map(c => `<label><input type="checkbox" value="${c}" ${atuais.some(a=>norm(a)===norm(c))?"checked":""}> ${c}</label>`).join("");
   $("mOutras").value = atuais.filter(a => !COMPAT.some(c=>norm(c)===norm(a))).join(", ");
   $("mLink").value = d?.link || "";
@@ -483,27 +568,29 @@ $("bCancel").onclick = () => $("dlg").close();
 $("mFrente").onchange = e => { arqs.frente = e.target.files[0]; if(arqs.frente) previa($("pFrente"), URL.createObjectURL(arqs.frente)); };
 $("mVerso").onchange = e => { arqs.verso = e.target.files[0]; if(arqs.verso) previa($("pVerso"), URL.createObjectURL(arqs.verso)); };
 
-// padroniza a foto: quadrado de 1000x1000, fundo branco, sem cortar a imagem
+// reduz a foto (máx. 1400 px no lado maior), mantendo a imagem inteira, sem bordas
 function reduzir(file){
   return new Promise((ok, fail) => {
     const img = new Image();
     img.onload = () => {
-      const T = 1000, k = Math.min(T/img.width, T/img.height);
-      const w = Math.round(img.width*k), h = Math.round(img.height*k);
-      const c = document.createElement("canvas"); c.width = T; c.height = T;
-      const x = c.getContext("2d");
-      x.fillStyle = "#fff"; x.fillRect(0,0,T,T);
-      x.drawImage(img,(T-w)/2,(T-h)/2,w,h);
+      const k = Math.min(1, 1400 / Math.max(img.width, img.height));
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.width*k); c.height = Math.round(img.height*k);
+      c.getContext("2d").drawImage(img,0,0,c.width,c.height);
       c.toBlob(b => b ? ok(b) : fail(new Error("Falha ao processar a imagem")), "image/jpeg", 0.85);
     };
     img.onerror = () => fail(new Error("Imagem inválida"));
     img.src = URL.createObjectURL(file);
   });
 }
+function pegarTags(){
+  const m = [...document.querySelectorAll("#mTagsBox input:checked")].map(i=>i.value);
+  return padroniza([...m, $("mTagsOutras").value].join(","), TAGS, SINON_TAGS).join(", ");
+}
 function pegarComp(){
   const marcadas = [...document.querySelectorAll("#mComps input:checked")].map(i=>i.value);
   const outras = $("mOutras").value.split(",").map(t=>t.trim()).filter(Boolean);
-  return [...marcadas, ...outras].join(", ");
+  return padroniza([...marcadas, ...outras].join(","), COMPAT, {}).join(", ");
 }
 function normLink(v){
   v = v.trim(); if(!v) return null;
@@ -523,7 +610,7 @@ $("fModelo").onsubmit = async e => {
     const reg = {
       modelo: $("mModelo").value.trim(),
       tipo: $("mTipo").value, porta: $("mPorta").value,
-      tags: $("mTags").value.trim(), compatibilidade: pegarComp(),
+      tags: pegarTags(), valor_parcelado: $("mParc").value.trim() || null, compatibilidade: pegarComp(),
       link: normLink($("mLink").value),
       mensagem: $("mMsgPronta").value.trim() || null,
       video_comercial: normLink($("mVidCom").value), video_educativo: normLink($("mVidEdu").value),
@@ -543,7 +630,7 @@ $("fModelo").onsubmit = async e => {
 
 // ---------- Exportar planilha (CSV) ----------
 $("bCsv").onclick = () => {
-  const cols = ["modelo","tipo","tags","compatibilidade","porta","link","video_comercial","video_educativo","mensagem","preco_instalacao","preco_venda","foto_frente","foto_verso"];
+  const cols = ["modelo","tipo","tags","compatibilidade","porta","link","video_comercial","video_educativo","mensagem","preco_instalacao","preco_venda","valor_parcelado","foto_frente","foto_verso"];
   const q = v => `"${String(v ?? "").replace(/"/g,'""')}"`;
   const linhas = [cols.join(";"), ...dados.map(d => cols.map(c => q(d[c])).join(";"))];
   const a = document.createElement("a");
@@ -557,7 +644,7 @@ const CAT = {
   instalacao:{novo:"Nova instalação",lt:"Tema da instalação",   ld:"Detalhes e passo a passo", ph:"ex: Furação para porta de alumínio"},
   preco:     {novo:"Nova regra",     lt:"Situação",             ld:"Regra / observação",       ph:"ex: Batente de mármore"}
 };
-let vista = "catalogo", baseDados = [], baseEdit = null, baseFile = null;
+let vista = "catalogo", baseDados = [], baseEdit = null, baseFile = null, baseFotoUrl = null;
 
 async function carregarBase(){
   const {data,error} = await sb.from("base_tecnica").select("*").order("criado_em",{ascending:false});
@@ -610,7 +697,7 @@ function abrirBase(d){
   $("bsFech").innerHTML = `<option value="">Geral (todas as fechaduras)</option>` + nomes.map(m => `<option>${esc(m)}</option>`).join("");
   $("bsFech").value = d?.fechadura || "";
   $("bsTit").value = d?.titulo || ""; $("bsDesc").value = d?.descricao || "";
-  $("bsValor").value = d?.valor ?? ""; $("bsFoto").value = ""; previa($("bsPrev"), d?.foto);
+  $("bsValor").value = d?.valor ?? ""; $("bsFoto").value = ""; baseFotoUrl = d?.foto || null; previa($("bsPrev"), baseFotoUrl);
   $("dBase").showModal();
 }
 $("painel").onclick = e => { if(e.target.dataset.vista) irPara(e.target.dataset.vista); };
@@ -640,7 +727,7 @@ $("fBase").onsubmit = async e => {
       categoria: cat, titulo: $("bsTit").value.trim(), descricao: $("bsDesc").value.trim() || null,
       fechadura: $("bsFech").value || null,
       valor: (cat === "preco" && $("bsValor").value !== "") ? Number($("bsValor").value) : null,
-      foto: baseEdit?.foto || null
+      foto: baseFotoUrl
     };
     if(baseFile) reg.foto = await subir(baseFile);
     const r = baseEdit ? await sb.from("base_tecnica").update(reg).eq("id", baseEdit.id)
@@ -650,6 +737,128 @@ $("fBase").onsubmit = async e => {
   }catch(err){ $("bsMsg").textContent = "Erro ao salvar: " + (err.message || err); }
   btn.disabled = false; btn.textContent = "Salvar";
 };
+
+// ---------- Filtros por tag ----------
+$("chips").innerHTML = CHIPS.map(c => `<button type="button" class="chip" data-f="${esc(c.v)}">${esc(c.l)}</button>`).join("")
+  + `<button type="button" class="chip limpar hide" id="chipLimpar" data-f="">Limpar filtros</button>`;
+$("chips").onclick = e => {
+  const b = e.target.closest("[data-f]"); if(!b) return;
+  const f = b.dataset.f;
+  if(f === ""){ filtros.clear(); $("chips").querySelectorAll(".on").forEach(x => x.classList.remove("on")); }
+  else { filtros.has(f) ? filtros.delete(f) : filtros.add(f); b.classList.toggle("on"); }
+  $("chipLimpar").classList.toggle("hide", !filtros.size);
+  render();
+};
+
+// ---------- Importar fechadura do catálogo (Base técnica) ----------
+$("bsFech").onchange = () => {
+  const m = dados.find(x => x.modelo === $("bsFech").value);
+  if(!m) return;
+  if((baseEdit?.categoria || vista) === "instalacao" && !$("bsTit").value.trim()) $("bsTit").value = m.modelo;
+  const fotoDoCatalogo = !baseFotoUrl || dados.some(x => x.foto_frente === baseFotoUrl);
+  if(!baseFile && fotoDoCatalogo && m.foto_frente){ baseFotoUrl = m.foto_frente; previa($("bsPrev"), baseFotoUrl); }
+};
+$("bsFotoX").onclick = () => { baseFile = null; baseFotoUrl = null; $("bsFoto").value = ""; previa($("bsPrev"), null); };
+
+// ---------- Parcelado automático ----------
+let parcManual = false;
+// arredonda para cima até o próximo valor terminado em 9,90 (52,45 -> 59,90 | 59,24 -> 59,90 | 146,65 -> 149,90)
+function arredonda90(v){ const c = Math.round(v*100); return (Math.ceil((c+10)/1000)*1000 - 10) / 100; }
+function calcParcelas(venda){ return PARCELAS.map(p => ({n:p.n, v:arredonda90(venda*p.fator/p.n)})); }
+$("mParc").oninput = () => { parcManual = true; };
+$("mVenda").oninput = () => {
+  if(parcManual) return;
+  const venda = Number($("mVenda").value);
+  if(!(venda > 0)){ $("mParc").value = ""; $("parcDica").textContent = ""; return; }
+  const ps = calcParcelas(venda);
+  $("mParc").value = ps.map(p => `${p.n}x de ${brl(p.v)}`).join(" ou ");
+  $("parcDica").textContent = ps.map(p => `${p.n}x = total de ${brl(p.n*p.v)}`).join(" · ");
+};
+
+// ---------- Corrigir bordas brancas das fotos já enviadas ----------
+function aparaBordas(blob){
+  return new Promise((ok, fail) => {
+    const img = new Image();
+    img.onload = () => {
+      const w = img.naturalWidth, h = img.naturalHeight;
+      const c = document.createElement("canvas"); c.width = w; c.height = h;
+      const x = c.getContext("2d", {willReadFrequently:true}); x.drawImage(img,0,0);
+      const px = x.getImageData(0,0,w,h).data;
+      const branco = i => px[i] > 244 && px[i+1] > 244 && px[i+2] > 244;
+      const linha = y => { for(let a=0;a<w;a++) if(!branco((y*w+a)*4)) return true; return false; };
+      const coluna = a => { for(let y=0;y<h;y++) if(!branco((y*w+a)*4)) return true; return false; };
+      let t = 0, b = h-1, l = 0, r = w-1;
+      while(t < b && !linha(t)) t++;
+      while(b > t && !linha(b)) b--;
+      while(l < r && !coluna(l)) l++;
+      while(r > l && !coluna(r)) r--;
+      const nw = r-l+1, nh = b-t+1;
+      if(nw > w*0.97 && nh > h*0.97) return ok(null);
+      const c2 = document.createElement("canvas"); c2.width = nw; c2.height = nh;
+      c2.getContext("2d").drawImage(c, l, t, nw, nh, 0, 0, nw, nh);
+      c2.toBlob(bb => bb ? ok(bb) : fail(new Error("Falha ao cortar")), "image/jpeg", 0.88);
+    };
+    img.onerror = () => fail(new Error("Imagem inválida"));
+    img.src = URL.createObjectURL(blob);
+  });
+}
+async function corrigirBordas(){
+  if(!confirm("Vou procurar bordas brancas nas fotos do catálogo e da base técnica e cortar. As fotos corrigidas substituem as atuais nos cards. Continuar?")) return;
+  const urls = new Set();
+  dados.forEach(d => { if(d.foto_frente) urls.add(d.foto_frente); if(d.foto_verso) urls.add(d.foto_verso); });
+  baseDados.forEach(d => { if(d.foto) urls.add(d.foto); });
+  let i = 0, feitas = 0, erros = 0;
+  for(const url of urls){
+    i++; toast(`Corrigindo fotos… ${i}/${urls.size}`);
+    try{
+      const novo = await aparaBordas(await (await fetch(url)).blob());
+      if(!novo) continue;
+      const nome = `${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
+      const up = await sb.storage.from("fotos").upload(nome, novo, {contentType:"image/jpeg"});
+      if(up.error) throw up.error;
+      const nova = sb.storage.from("fotos").getPublicUrl(nome).data.publicUrl;
+      await sb.from("fechaduras").update({foto_frente:nova}).eq("foto_frente", url);
+      await sb.from("fechaduras").update({foto_verso:nova}).eq("foto_verso", url);
+      await sb.from("base_tecnica").update({foto:nova}).eq("foto", url);
+      feitas++;
+    }catch(_){ erros++; }
+  }
+  await carregar(); await carregarBase();
+  toast(`${feitas} foto(s) corrigida(s)` + (erros ? `, ${erros} com erro` : ""));
+}
+$("pBordas").onclick = () => { painel(false); corrigirBordas(); };
+
+// ---------- Gravar a padronização nos cadastros existentes ----------
+async function padronizarBanco(){
+  const mudar = [], fora = new Set();
+  dados.forEach(d => {
+    const novo = {};
+    const tipo = padronizaTipo(d.tipo);
+    const tags = padroniza(d.tags, TAGS, SINON_TAGS);
+    const comp = padroniza(d.compatibilidade, COMPAT, {});
+    if(d.tipo && tipo !== d.tipo) novo.tipo = tipo;
+    if(d.tags && tags.join(", ") !== d.tags) novo.tags = tags.join(", ");
+    if(d.compatibilidade && comp.join(", ") !== d.compatibilidade) novo.compatibilidade = comp.join(", ");
+    tags.filter(t => !TAGS.includes(t)).forEach(t => fora.add(t));
+    if(Object.keys(novo).length) mudar.push({id:d.id, novo});
+  });
+  if(!mudar.length) return toast("Tudo já está padronizado");
+  const aviso = fora.size ? `\n\nTags fora da lista (ficam como "Outras tags"): ${[...fora].join(", ")}` : "";
+  if(!confirm(`${mudar.length} modelo(s) serão ajustados (tags, compatibilidade e tipo).${aviso}\n\nContinuar?`)) return;
+  let erros = 0;
+  for(const m of mudar){
+    const {error} = await sb.from("fechaduras").update(m.novo).eq("id", m.id);
+    if(error) erros++;
+  }
+  await carregar();
+  toast(`${mudar.length - erros} modelo(s) padronizados` + (erros ? `, ${erros} com erro` : ""));
+}
+$("pPadroniza").onclick = () => { painel(false); padronizarBanco(); };
+
+// ---------- Celular ----------
+$("fab").onclick = () => vista === "catalogo" ? abrir(null) : abrirBase(null);
+$("pCsv").onclick = () => $("bCsv").click();
+$("pSair").onclick = () => $("bSair").click();
 
 iniciar();
 </script>
