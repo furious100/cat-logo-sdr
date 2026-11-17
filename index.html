@@ -13,8 +13,8 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <style>
-:root{--bg:#ece9e4;--card:#fff;--ink:#1c2024;--mut:#6a737b;--line:#ddd9d2;--acc:#a8741a;--accbg:#f5ead3;--head:#1c2024;--bad:#b3362c;--ipbg:#dcebf7;--ipfg:#1d5f94;--sh:0 1px 2px rgba(20,20,20,.06),0 4px 14px rgba(20,20,20,.05)}
-@media(prefers-color-scheme:dark){:root{--bg:#121518;--card:#1c2126;--ink:#e9edf0;--mut:#97a3ac;--line:#2d353c;--acc:#d9a441;--accbg:#3a2f18;--head:#0d1013;--bad:#e5766c;--ipbg:#17344d;--ipfg:#8cc4f0;--sh:0 1px 2px rgba(0,0,0,.4)}}
+:root{--bg:#ece9e4;--card:#fff;--ink:#1c2024;--mut:#6a737b;--line:#ddd9d2;--acc:#a8741a;--accbg:#f5ead3;--head:#1c2024;--bad:#b3362c;--ok:#2f7d4f;--ipbg:#dcebf7;--ipfg:#1d5f94;--sh:0 1px 2px rgba(20,20,20,.06),0 4px 14px rgba(20,20,20,.05)}
+@media(prefers-color-scheme:dark){:root{--bg:#121518;--card:#1c2126;--ink:#e9edf0;--mut:#97a3ac;--line:#2d353c;--acc:#d9a441;--accbg:#3a2f18;--head:#0d1013;--bad:#e5766c;--ok:#5cbb85;--ipbg:#17344d;--ipfg:#8cc4f0;--sh:0 1px 2px rgba(0,0,0,.4)}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;font:15px/1.5 "IBM Plex Sans",system-ui,sans-serif;background:var(--bg);color:var(--ink)}
 button,input,select,textarea{font:inherit;color:inherit}
@@ -40,6 +40,9 @@ header .logo{background:#fff;border-radius:8px;padding:3px 7px}
 .chip{min-height:36px;padding:5px 14px;border-radius:99px;font-size:14px}
 .chip.on{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
 .chip.limpar{border-style:dashed;color:var(--mut)}
+.fixo{position:sticky;top:var(--hh,60px);z-index:4;background:var(--bg);padding-bottom:10px;box-shadow:0 8px 8px -8px rgba(0,0,0,.18)}
+.fixo .bar{margin-top:0;padding-top:10px}
+.fixo .chips{margin-top:10px}
 .count{max-width:1200px;margin:12px auto;padding:0 18px;color:var(--mut);font-size:14px}
 .grid{max-width:1200px;margin:0 auto;padding:0 18px 96px;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(320px,100%),1fr));gap:18px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--sh);transition:box-shadow .2s,transform .2s}
@@ -48,6 +51,7 @@ header .logo{background:#fff;border-radius:8px;padding:3px 7px}
 .imgs figure{min-width:0;overflow:hidden;margin:0;position:relative;aspect-ratio:1;background:var(--bg);display:grid;place-items:center}
 .imgs img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;cursor:zoom-in}
 .imgs figcaption{position:absolute;left:8px;bottom:8px;background:rgba(0,0,0,.6);color:#fff;font-size:12px;padding:1px 8px;border-radius:99px}
+.imgs figure.unica{grid-column:1/-1;aspect-ratio:2/1}
 .imgs .vazio{color:var(--mut);font-size:13px}
 .tipo{display:flex;align-items:baseline;gap:8px;padding:9px 16px;color:#fff;font-weight:600;font-size:16px;background:#6b7782}
 .tipo small{font-weight:400;font-size:13px;opacity:.85}
@@ -91,6 +95,11 @@ form label{display:grid;gap:4px;font-size:13px;color:var(--mut)}
 .checks label:has(input:checked){background:var(--accbg);border-color:var(--acc);color:var(--acc);font-weight:600}
 .prev{height:110px;border:1px dashed var(--line);border-radius:10px;display:grid;place-items:center;overflow:hidden;font-size:12px}
 .prev img{width:100%;height:100%;object-fit:cover}
+.lucro{font-size:12.5px;color:var(--mut);border-top:1px dashed var(--line);padding-top:8px}
+.lucro b{color:var(--ok)}.lucro.neg b{color:var(--bad)}
+.calc{display:flex;flex-wrap:wrap;gap:8px;font-size:14px}
+.calc span{background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:6px 11px;color:var(--ink)}
+.calc b{color:var(--ok)}
 .fim{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;margin-top:6px}
 .msg{color:var(--bad);font-size:14px;min-height:20px}
 .msgbox{white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px;max-height:55vh;overflow:auto}
@@ -158,6 +167,7 @@ form label{display:grid;gap:4px;font-size:13px;color:var(--mut)}
     <button type="button" data-vista="catalogo">Catálogo de fechaduras</button>
     <button type="button" data-vista="problema">Base técnica</button>
     <button type="button" data-vista="preco">Precificação de serviço</button>
+    <button type="button" data-vista="acessorio">Acessórios</button>
     <nav id="navLinks"></nav>
     <button type="button" id="bHist">Histórico de alterações</button>
     <button type="button" id="pCsv">Exportar planilha</button>
@@ -175,10 +185,12 @@ form label{display:grid;gap:4px;font-size:13px;color:var(--mut)}
     <button id="bSair">Sair</button>
   </header>
   <section id="vCatalogo">
+  <div class="fixo">
   <div class="bar">
     <input type="search" id="busca" placeholder="Buscar modelo, embutir, sobrepor…" autofocus>
   </div>
   <div class="chips" id="chips"></div>
+  </div>
   <div class="count" id="count"></div>
   <main class="grid" id="grid"></main>
   </section>
@@ -189,7 +201,7 @@ form label{display:grid;gap:4px;font-size:13px;color:var(--mut)}
       <button type="button" data-cat="problema">Problemas</button>
       <button type="button" data-cat="instalacao">Instalações</button>
     </div>
-    <div class="bar"><input type="search" id="buscaBase" placeholder="Buscar por título, descrição ou fechadura…"></div>
+    <div class="fixo"><div class="bar"><input type="search" id="buscaBase" placeholder="Buscar por título, descrição ou fechadura…"></div></div>
     <div class="count" id="countBase"></div>
     <main class="grid" id="gridBase"></main>
   </section>
@@ -228,6 +240,8 @@ form label{display:grid;gap:4px;font-size:13px;color:var(--mut)}
     </div>
     <label>Valor parcelado (calculado sozinho, pode editar)<input id="mParc" placeholder="ex: 6x de R$ 149,90"></label>
     <div class="lbl" id="parcDica"></div>
+    <label>Custo (R$)<input id="mCusto" type="number" step="0.01" min="0"></label>
+    <div class="calc" id="mCalc"></div>
     <div class="row">
       <label>Foto da frente<div class="prev" id="pFrente">Sem foto</div><input type="file" accept="image/*" id="mFrente"></label>
       <label>Foto do verso<div class="prev" id="pVerso">Sem foto</div><input type="file" accept="image/*" id="mVerso"></label>
@@ -260,10 +274,16 @@ form label{display:grid;gap:4px;font-size:13px;color:var(--mut)}
 <dialog id="dBase">
   <form id="fBase">
     <h3 id="bsTitulo">Novo registro</h3>
-    <label>Fechadura do catálogo (importa o nome e a foto)<select id="bsFech"></select></label>
+    <label id="bsLblFech">Fechadura do catálogo (importa o nome e a foto)<select id="bsFech"></select></label>
     <label><span id="bsLblTitulo">Título</span><input id="bsTit" required></label>
     <label><span id="bsLblDesc">Descrição</span><textarea id="bsDesc" rows="7"></textarea></label>
-    <label id="bsLblValor">Valor adicional (R$)<input id="bsValor" type="number" step="0.01"></label>
+    <label id="bsLblValor"><span id="bsLblValorTxt">Valor adicional (R$)</span><input id="bsValor" type="number" step="0.01"></label>
+    <div id="bsAcc" class="grp hide">
+      <label>Custo (R$)<input id="bsCusto" type="number" step="0.01" min="0"></label>
+      <div class="calc" id="bsCalc"></div>
+      <label>Valor parcelado (calculado sozinho, pode editar)<input id="bsParc" placeholder="ex: 6x de R$ 29,90"></label>
+      <div class="lbl" id="bsParcDica"></div>
+    </div>
     <label>Foto (opcional)<div class="prev" id="bsPrev">Sem foto</div><input type="file" accept="image/*" id="bsFoto"></label>
     <button type="button" id="bsFotoX">Remover foto</button>
     <div class="msg" id="bsMsg"></div>
@@ -387,15 +407,15 @@ function render(){
   $("grid").innerHTML = lista.length ? lista.map(card).join("") :
     `<div class="vazio-geral">${dados.length ? "Nenhum modelo com essa busca." : "Nenhum modelo cadastrado. Clique em “Novo modelo” para começar."}</div>`;
 }
-function foto(url,leg){
-  return `<figure>${url ? `<img src="${esc(url)}" alt="${leg}" loading="lazy" data-zoom="${esc(url)}">` : `<span class="vazio">Sem foto</span>`}<figcaption>${leg}</figcaption></figure>`;
+function foto(url,leg,unica){
+  return `<figure${unica ? ' class="unica"' : ""}>${url ? `<img src="${esc(url)}" alt="${leg}" loading="lazy" data-zoom="${esc(url)}">` : `<span class="vazio">Sem foto</span>`}${url ? `<figcaption>${leg}</figcaption>` : ""}</figure>`;
 }
 function card(d){
   const ip = norm(d.compatibilidade).includes("ip55");
   const tags = (ip ? `<span class="tag ip">IP55 · prova d’água</span>` : "") + padroniza(d.tags, TAGS, SINON_TAGS)
     .map(t=>`<span class="tag">${esc(t)}</span>`).join("");
   return `<article class="card">
-    <div class="imgs">${foto(d.foto_frente,"Frente")}${foto(d.foto_verso,"Verso")}</div>
+    <div class="imgs">${(d.foto_frente && d.foto_verso) ? foto(d.foto_frente,"Frente") + foto(d.foto_verso,"Verso") : foto(d.foto_frente || d.foto_verso, d.foto_frente ? "Frente" : "Verso", true)}</div>
     <div class="tipo tipo-${norm(padronizaTipo(d.tipo))}"><small>Instalação</small>${esc(padronizaTipo(d.tipo) || "Não informada")}</div>
     <div class="body">
       <h2>${esc(d.modelo)}</h2>
@@ -408,6 +428,7 @@ function card(d){
         <div><small>Instalação</small><b>${brl(d.preco_instalacao)}</b></div>
         <div class="venda"><small>Venda</small><b>${brl(d.preco_venda)}</b>${d.valor_parcelado ? `<em class="parc">${esc(d.valor_parcelado)}</em>` : ""}</div>
       </div>
+      ${lucroHtml(d.preco_venda, d.custo)}
       ${d.link ? `<a class="linkbtn" href="${esc(d.link)}" target="_blank" rel="noopener noreferrer">Acessar link da fechadura</a>` : ""}
       ${d.mensagem ? `<button class="pri" data-msg="${d.id}">Ver mensagem para WhatsApp</button>` : ""}
       ${(d.video_comercial || d.video_educativo) ? `<details class="extra"><summary>Informações adicionais</summary><div class="extrain">
@@ -485,7 +506,7 @@ $("ovl").onclick = () => painel(false);
 
 // ---------- Histórico de alterações ----------
 const CAMPOS = {modelo:"Modelo",tipo:"Tipo",tags:"Tags",compatibilidade:"Compatibilidade",porta:"Porta",
-  preco_instalacao:"Preço de instalação",preco_venda:"Preço de venda",valor_parcelado:"Valor parcelado",link:"Link",mensagem:"Mensagem",
+  preco_instalacao:"Preço de instalação",preco_venda:"Preço de venda",valor_parcelado:"Valor parcelado",custo:"Custo",link:"Link",mensagem:"Mensagem",
   foto_frente:"Foto da frente",foto_verso:"Foto do verso",video_comercial:"Vídeo comercial",video_educativo:"Vídeo educativo",biometria:"Biometria"};
 const SEM_VALOR = ["foto_frente","foto_verso","mensagem"];
 const fmt = v => (v == null || v === "") ? "(vazio)" : esc(String(v));
@@ -561,6 +582,7 @@ function abrir(d){
   $("mVenda").value = d?.preco_venda ?? "";
   $("mFrente").value = ""; $("mVerso").value = "";
   previa($("pFrente"), d?.foto_frente); previa($("pVerso"), d?.foto_verso);
+  $("mCusto").value = d?.custo ?? ""; calcM();
   $("dlg").showModal();
 }
 $("bNovo").onclick = () => abrir(null);
@@ -610,7 +632,7 @@ $("fModelo").onsubmit = async e => {
     const reg = {
       modelo: $("mModelo").value.trim(),
       tipo: $("mTipo").value, porta: $("mPorta").value,
-      tags: pegarTags(), valor_parcelado: $("mParc").value.trim() || null, compatibilidade: pegarComp(),
+      tags: pegarTags(), valor_parcelado: $("mParc").value.trim() || null, custo: $("mCusto").value === "" ? null : Number($("mCusto").value), compatibilidade: pegarComp(),
       link: normLink($("mLink").value),
       mensagem: $("mMsgPronta").value.trim() || null,
       video_comercial: normLink($("mVidCom").value), video_educativo: normLink($("mVidEdu").value),
@@ -630,7 +652,7 @@ $("fModelo").onsubmit = async e => {
 
 // ---------- Exportar planilha (CSV) ----------
 $("bCsv").onclick = () => {
-  const cols = ["modelo","tipo","tags","compatibilidade","porta","link","video_comercial","video_educativo","mensagem","preco_instalacao","preco_venda","valor_parcelado","foto_frente","foto_verso"];
+  const cols = ["modelo","tipo","tags","compatibilidade","porta","link","video_comercial","video_educativo","mensagem","preco_instalacao","preco_venda","valor_parcelado","custo","foto_frente","foto_verso"];
   const q = v => `"${String(v ?? "").replace(/"/g,'""')}"`;
   const linhas = [cols.join(";"), ...dados.map(d => cols.map(c => q(d[c])).join(";"))];
   const a = document.createElement("a");
@@ -640,6 +662,7 @@ $("bCsv").onclick = () => {
 
 // ---------- Base técnica e Precificação ----------
 const CAT = {
+  acessorio: {novo:"Novo acessório", lt:"Nome do acessório", ld:"Observações (opcional)", ph:"ex: Bateria 9V alcalina"},
   problema:  {novo:"Novo problema",  lt:"Problema",             ld:"Como resolver",            ph:"ex: Fechadura não destrava com a biometria"},
   instalacao:{novo:"Nova instalação",lt:"Tema da instalação",   ld:"Detalhes e passo a passo", ph:"ex: Furação para porta de alumínio"},
   preco:     {novo:"Nova regra",     lt:"Situação",             ld:"Regra / observação",       ph:"ex: Batente de mármore"}
@@ -659,14 +682,14 @@ function irPara(v){
   $("bNovo").classList.toggle("hide", !cat); $("bCsv").classList.toggle("hide", !cat);
   $("bNovoBase").classList.toggle("hide", cat);
   if(!cat){
-    $("baseTabs").classList.toggle("hide", v === "preco");
+    $("baseTabs").classList.toggle("hide", v === "preco" || v === "acessorio");
     $("bNovoBase").textContent = CAT[v].novo; $("buscaBase").value = ""; renderBase();
   }
 }
 function renderBase(){
   if(vista === "catalogo") return;
   document.querySelectorAll("#baseTabs button").forEach(b => b.classList.toggle("on", b.dataset.cat === vista));
-  $("baseTitulo").textContent = vista === "preco" ? "Precificação de serviço" : "Base técnica";
+  $("baseTitulo").textContent = ({preco:"Precificação de serviço", acessorio:"Acessórios"})[vista] || "Base técnica";
   const termos = norm($("buscaBase").value).split(/\s+/).filter(Boolean);
   const lista = baseDados.filter(d => d.categoria === vista &&
     termos.every(t => norm([d.titulo,d.descricao,d.fechadura].join(" ")).includes(t)));
@@ -680,7 +703,9 @@ function cardBase(d){
     <div class="body">
       <h2>${esc(d.titulo)}</h2>
       ${d.fechadura ? `<div class="tags"><span class="tag">${esc(d.fechadura)}</span></div>` : ""}
-      ${d.valor != null ? `<div class="precos" style="grid-template-columns:1fr;margin-top:0"><div><small>Valor adicional</small><b>${d.valor > 0 ? "+ " : ""}${brl(d.valor)}</b></div></div>` : ""}
+      ${d.categoria === "acessorio"
+        ? (d.valor != null ? `<div class="precos" style="grid-template-columns:1fr;margin-top:0"><div class="venda"><small>Valor</small><b>${brl(d.valor)}</b>${d.valor_parcelado ? `<em class="parc">${esc(d.valor_parcelado)}</em>` : ""}</div></div>${lucroHtml(d.valor, d.custo)}` : "")
+        : (d.valor != null ? `<div class="precos" style="grid-template-columns:1fr;margin-top:0"><div><small>Valor adicional</small><b>${d.valor > 0 ? "+ " : ""}${brl(d.valor)}</b></div></div>` : "")}
       ${d.descricao ? `<div class="texto">${esc(d.descricao)}</div>` : ""}
     </div>
     <div class="acoes"><button data-bedit="${d.id}">Editar</button><button class="del" data-bdel="${d.id}">Excluir</button></div>
@@ -691,13 +716,17 @@ function abrirBase(d){
   const cat = d?.categoria || vista, c = CAT[cat];
   $("bsTitulo").textContent = d ? "Editar registro" : c.novo;
   $("bsLblTitulo").textContent = c.lt; $("bsTit").placeholder = c.ph; $("bsLblDesc").textContent = c.ld;
-  $("bsLblValor").classList.toggle("hide", cat !== "preco");
+  $("bsLblValor").classList.toggle("hide", !["preco","acessorio"].includes(cat));
+  $("bsLblValorTxt").textContent = cat === "acessorio" ? "Valor de venda (R$)" : "Valor adicional (R$)";
+  $("bsLblFech").classList.toggle("hide", cat === "acessorio");
+  $("bsAcc").classList.toggle("hide", cat !== "acessorio");
   const nomes = [...new Set(dados.map(x => x.modelo))].sort();
   if(d?.fechadura && !nomes.includes(d.fechadura)) nomes.push(d.fechadura);
   $("bsFech").innerHTML = `<option value="">Geral (todas as fechaduras)</option>` + nomes.map(m => `<option>${esc(m)}</option>`).join("");
   $("bsFech").value = d?.fechadura || "";
   $("bsTit").value = d?.titulo || ""; $("bsDesc").value = d?.descricao || "";
   $("bsValor").value = d?.valor ?? ""; $("bsFoto").value = ""; baseFotoUrl = d?.foto || null; previa($("bsPrev"), baseFotoUrl);
+  $("bsCusto").value = d?.custo ?? ""; $("bsParc").value = d?.valor_parcelado || ""; parcManualB = false; $("bsParcDica").textContent = ""; calcB();
   $("dBase").showModal();
 }
 $("painel").onclick = e => { if(e.target.dataset.vista) irPara(e.target.dataset.vista); };
@@ -725,8 +754,10 @@ $("fBase").onsubmit = async e => {
     const cat = baseEdit?.categoria || vista;
     const reg = {
       categoria: cat, titulo: $("bsTit").value.trim(), descricao: $("bsDesc").value.trim() || null,
-      fechadura: $("bsFech").value || null,
-      valor: (cat === "preco" && $("bsValor").value !== "") ? Number($("bsValor").value) : null,
+      fechadura: cat === "acessorio" ? null : ($("bsFech").value || null),
+      valor: ((cat === "preco" || cat === "acessorio") && $("bsValor").value !== "") ? Number($("bsValor").value) : null,
+      custo: (cat === "acessorio" && $("bsCusto").value !== "") ? Number($("bsCusto").value) : null,
+      valor_parcelado: cat === "acessorio" ? ($("bsParc").value.trim() || null) : null,
       foto: baseFotoUrl
     };
     if(baseFile) reg.foto = await subir(baseFile);
@@ -854,6 +885,50 @@ async function padronizarBanco(){
   toast(`${mudar.length - erros} modelo(s) padronizados` + (erros ? `, ${erros} com erro` : ""));
 }
 $("pPadroniza").onclick = () => { painel(false); padronizarBanco(); };
+
+// ---------- Lucro e markup ----------
+function calcLucro(venda, custo){
+  if(venda == null || venda === "" || custo == null || custo === "") return null;
+  const v = Number(venda), c = Number(custo);
+  if(!isFinite(v) || !isFinite(c)) return null;
+  return { lucro: v - c, markup: c > 0 ? (v / c - 1) * 100 : null };   // markup = lucro ÷ custo
+}
+const pct = n => n == null ? "—" : n.toLocaleString("pt-BR", {maximumFractionDigits:1}) + "%";
+function lucroHtml(venda, custo){
+  const x = calcLucro(venda, custo); if(!x) return "";
+  return `<div class="lucro ${x.lucro < 0 ? "neg" : ""}">Custo ${brl(Number(custo))} · Lucro <b>${brl(x.lucro)}</b> · Markup <b>${pct(x.markup)}</b></div>`;
+}
+function calcHtml(venda, custo){
+  const x = calcLucro(venda, custo); if(!x) return "";
+  const cor = x.lucro < 0 ? ' style="color:var(--bad)"' : "";
+  return `<span>Lucro <b${cor}>${brl(x.lucro)}</b></span><span>Markup <b${cor}>${pct(x.markup)}</b></span>`;
+}
+const calcM = () => { $("mCalc").innerHTML = calcHtml($("mVenda").value, $("mCusto").value); };
+$("mVenda").addEventListener("input", calcM);
+$("mCusto").addEventListener("input", calcM);
+
+// ---------- Acessórios: lucro, markup e parcelado ----------
+let parcManualB = false;
+const catAtual = () => baseEdit?.categoria || vista;
+const calcB = () => { $("bsCalc").innerHTML = catAtual() === "acessorio" ? calcHtml($("bsValor").value, $("bsCusto").value) : ""; };
+$("bsParc").oninput = () => { parcManualB = true; };
+$("bsValor").addEventListener("input", () => {
+  if(catAtual() === "acessorio" && !parcManualB){
+    const venda = Number($("bsValor").value);
+    if(venda > 0){
+      const ps = PARCELAS.map(p => ({n:p.n, v:Math.ceil(venda*p.fator/p.n*100)/100}));   // juros normal, sem o arredondamento ,90
+      $("bsParc").value = ps.map(p => `${p.n}x de ${brl(p.v)}`).join(" ou ");
+      $("bsParcDica").textContent = ps.map(p => `${p.n}x = total de ${brl(p.n*p.v)}`).join(" · ");
+    } else { $("bsParc").value = ""; $("bsParcDica").textContent = ""; }
+  }
+  calcB();
+});
+$("bsCusto").addEventListener("input", calcB);
+
+// ---------- Busca fixa abaixo do topo ----------
+const cabecalho = document.querySelector("header");
+const ajustaTopo = () => document.documentElement.style.setProperty("--hh", cabecalho.offsetHeight + "px");
+new ResizeObserver(ajustaTopo).observe(cabecalho); ajustaTopo();
 
 // ---------- Celular ----------
 $("fab").onclick = () => vista === "catalogo" ? abrir(null) : abrirBase(null);
